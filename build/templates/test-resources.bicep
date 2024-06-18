@@ -68,7 +68,10 @@ module serviceBus_namespace 'br/public:avm/res/service-bus/namespace:0.5.0' = {
   authorizationRules: [
     {
       name: 'SendListenAccessKey'
-      rights: [ 'Send', 'Listen' ]
+      rights: [
+        'Send'
+        'Listen'
+      ]
     }
   ]
  }
@@ -90,11 +93,10 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.9.1' = {
     location: location
     kind: 'BlobStorage'
     skuName: 'Standard_LRS'
+    allowBlobPublicAccess: true
     blobServices: {
-      defaultServiceVersion: '2021-06-01'
       container: {
         name: containerName
-        publicAccess: 'Container'
       }
     }
   }
@@ -125,7 +127,10 @@ module eventHubs_namespace 'br/public:avm/res/event-hub/namespace:0.2.2' = {
     authorizationRules: [
       {
         name: 'SendListenAccessKey'
-        rights: [ 'Send', 'Listen' ]
+        rights: [ 
+          'Send'
+          'Listen'
+        ]
       }
     ]
   }
@@ -165,7 +170,8 @@ module vault 'br/public:avm/res/key-vault/vault:0.6.1' = {
   name: 'vaultDeployment'
   dependsOn: [
     resourceGroup
-    serviceBus_namespace
+    serviceBus_ns
+    eventHubs_ns
   ]
   scope: rg
   params: {
