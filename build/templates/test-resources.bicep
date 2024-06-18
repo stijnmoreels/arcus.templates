@@ -17,7 +17,7 @@ param topicName string
 param queueName string
 
 // Define the name of the Event Hub item within the Event Hubs namespace.
-param eventHubName string
+param eventHubsName string
 
 // Define the name of the Blob Container within the Storage Account.
 param containerName string
@@ -118,7 +118,7 @@ module eventHubs_namespace 'br/public:avm/res/event-hub/namespace:0.2.2' = {
     skuCapacity: 1
     eventhubs: [
       {
-        name: eventHubName
+        name: eventHubsName
         partitionCount: 2
       }
     ]
