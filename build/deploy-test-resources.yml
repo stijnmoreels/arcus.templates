@@ -1,0 +1,67 @@
+name: Arcus Templates - Deploy test resources
+
+trigger: none
+pr: none
+
+parameters:
+  - name: azureServiceConnection
+    displayName: 'Azure service connection'
+    type: string
+    default: 'Azure Codit-Arcus Service Principal'
+  - name: resourceGroupName
+    displayName: 'Resource group name'
+    default: arcus-templates-dev-we-rg
+  - name: variableGroupName
+    displayName: 'Variable group name'
+    default: Arcus Templates - Integration Testing
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: arcus-azure/azure-devops-templates
+      endpoint: arcus-azure
+
+variables:
+  - template: variables/test.yml
+
+stages:
+  - stage: Deploy
+    jobs:
+      - job: DeployBicep
+        displayName: 'Deploy test resources'
+        pool:
+          vmImage: '$(Vm.Image)'
+        steps:
+          - task: AzureCLI@2
+            env:
+              SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            inputs:
+              azureSubscription: '${{ parameters.azureServiceConnection }}'
+              addSpnToEnvironment: true
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+                Install-Module -Name Arcus.Scripting.DevOps -AllowClobber
+
+                 $deployOutput = az deployment sub create `
+                  --location westeurope `
+                  --template-file ./build/templates/test-resources.bicep `
+                  --parameters location=westeurope `
+                  --parameters resourceGroupName=${{ parameters.resourceGroupName }} `
+                  --parameters topicName=${{ variables['Arcus.ServiceBus.Topic.Name'] }} `
+                  --parameters queueName=${{ variables['Arcus.ServiceBus.Queue.Name'] }} `
+                  --parameters eventHubsName=${{ variables['Arcus.EventHubs.Name'] }} `
+                  --parameters containerName=${{ variables['Arcus.StorageAccount.Container.Name'] }} `
+                  --parameters keyVaultName=${{ variables['Arcus.KeyVault.Name'] }} `
+                  --parameters instrumentationKey_secretName=${{ variables['Arcus.AppInsights.InstrumentationKey.SecretName'] }} `
+                  --parameters topicConnectionString_secretName=${{ variables['Arcus.ServiceBus.TopicConnectionString.SecretName'] }} `
+                  --parameters queueConnectionString_secretName=${{ variables['Arcus.ServiceBus.Queue.ConnectionString.SecretName'] }} `
+                  --parameters eventHubsConnectionString_secretName=${{ variables['Arcus.EventHubs.ConnectionString.SecretName'] }} `
+                  --parameters storageAccountConnectionString_secretName=${{ variables['Arcus.StorageAccount.ConnectionString.SecretName'] }} `
+                  --parameters servicePrincipal_objectId=$objectId `  
+                  | ConvertFrom-Json
+
+                $env:ArmOutputs = ConvertTo-Json $deployOutput.properties.outputs
+                Set-AzDevOpsArmOutputsToVariableGroup -VariableGroupName '${{ parameters.variableGroupName }}'

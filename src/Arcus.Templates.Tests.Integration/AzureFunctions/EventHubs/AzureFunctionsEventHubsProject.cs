@@ -131,8 +131,8 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
                 EventHubsConfig eventHubsConfig = Configuration.GetEventHubsConfig();
                 Environment.SetEnvironmentVariable("EventHubsConnectionString", eventHubsConfig.EventHubsConnectionString);
 
-                ApplicationInsightsConfig appInsightsConfig = Configuration.GetApplicationInsightsConfig();
-                Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", $"InstrumentationKey={appInsightsConfig.InstrumentationKey}");
+                string instrumentationKey = Configuration.GetApplicationInsightsInstrumentationKey();
+                Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", $"InstrumentationKey={instrumentationKey}");
 
                 Run(Configuration.BuildConfiguration, TargetFramework.Net8_0);
             }

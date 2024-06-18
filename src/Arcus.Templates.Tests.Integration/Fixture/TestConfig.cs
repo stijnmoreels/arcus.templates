@@ -296,20 +296,6 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         }
 
         /// <summary>
-        /// Gets the Azure Application Insights configuration to interact with the Application Insights resource.
-        /// </summary>
-        /// <exception cref="KeyNotFoundException">Thrown when one of the Azure Application Insights configuration values are not found.</exception>
-        public ApplicationInsightsConfig GetApplicationInsightsConfig()
-        {
-            var instrumentationKey = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:ApplicationInsights:InstrumentationKey");
-            var applicationId = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:ApplicationInsights:ApplicationId");
-            var apiKey = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:ApplicationInsights:ApiKey");
-            var metricName = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:ApplicationInsights:MetricName");
-
-            return new ApplicationInsightsConfig(instrumentationKey, applicationId, apiKey, metricName);
-        }
-
-        /// <summary>
         /// Gets or sets a configuration value.
         /// </summary>
         /// <param name="key">The configuration key.</param>

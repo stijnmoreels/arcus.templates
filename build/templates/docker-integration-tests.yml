@@ -1,3 +1,6 @@
+parameters:
+  azureServiceConnection: ''
+
 stages:
   - stage: DockerIntegrationTests
     displayName: Docker Integration Tests
@@ -9,6 +12,9 @@ stages:
         pool:
           vmImage: '$(Vm.Image)'
         steps:
+          - template: import-keyvault-secrets.yml
+            parameters:
+              azureServiceConnection: '${{ parameters.azureServiceConnection }}'
           - task: DownloadPipelineArtifact@2
             displayName: 'Download build artifacts'
             inputs:
@@ -32,7 +38,7 @@ stages:
               envVars: |
                 ARCUS_HTTP_PORT=$(Http.Port)
                 ASPNETCORE_URLS=http://+:$(Http.Port)
-                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus.ApplicationInsights.InstrumentationKey)
+                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus_AppInsights_InstrumentationKey)
           - template: 'run-new-project-from-template.yml'
             parameters:
               projectName: 'Arcus.Demo.ServiceBus.Queue'
@@ -44,10 +50,8 @@ stages:
                   Set-Content './Arcus.Demo.ServiceBus.Queue/Program.cs'
               envVars: |
                 ARCUS_HEALTH_PORT=$(Arcus.ServiceBus.Queue.Worker.HealthPort)
-                EVENTGRID_TOPIC_URI=$(Arcus.Worker.EventGrid.TopicUri)
-                EVENTGRID_AUTH_KEY=$(Arcus.Worker.EventGrid.AuthKey)
-                ARCUS_SERVICEBUS_CONNECTIONSTRING=$(Arcus.Worker.ServiceBus.Queue.ConnectionString)
-                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus.ApplicationInsights.InstrumentationKey)
+                ARCUS_SERVICEBUS_CONNECTIONSTRING=$(Arcus_ServiceBus_Queue_ConnectionString)
+                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus_App_InstrumentationKey)
           - template: 'run-new-project-from-template.yml'
             parameters:
               projectName: 'Arcus.Demo.ServiceBus.Topic'
@@ -59,10 +63,8 @@ stages:
                   Set-Content './Arcus.Demo.ServiceBus.Topic/Program.cs'
               envVars: |
                 ARCUS_HEALTH_PORT=$(Arcus.ServiceBus.Topic.Worker.HealthPort)
-                EVENTGRID_TOPIC_URI=$(Arcus.Worker.EventGrid.TopicUri)
-                EVENTGRID_AUTH_KEY=$(Arcus.Worker.EventGrid.AuthKey)
-                ARCUS_SERVICEBUS_CONNECTIONSTRING=$(Arcus.Worker.ServiceBus.Topic.ConnectionString)
-                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus.ApplicationInsights.InstrumentationKey)
+                ARCUS_SERVICEBUS_CONNECTIONSTRING=$(Arcus_ServiceBus_Topic_ConnectionString)
+                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus_App_InstrumentationKey)
           - template: 'run-new-project-from-template.yml'
             parameters:
               projectName: 'Arcus.Demo.EventHubs'
@@ -74,14 +76,12 @@ stages:
                   Set-Content './Arcus.Demo.EventHubs/Program.cs'
               envVars: |
                 ARCUS_HEALTH_PORT=$(Arcus.EventHubs.Worker.HealthPort)
-                EVENTGRID_TOPIC_URI=$(Arcus.Worker.EventGrid.TopicUri)
-                EVENTGRID_AUTH_KEY=$(Arcus.Worker.EventGrid.AuthKey)
-                EVENTHUBS_NAME=$(Arcus.EventHubs.Docker.EventHubsName)
-                BLOBSTORAGE_CONTAINERNAME=$(Arcus.EventHubs.Docker.BlobStorage.ContainerName)
-                ARCUS_EVENTHUBS_CONNECTIONSTRING=$(Arcus.EventHubs.ConnectionString)
-                ARCUS_STORAGEACCOUNT_CONNECTIONSTRING=$(Arcus.EventHubs.BlobStorage.StorageAccountConnectionString)
-                ARCUS_SERVICEBUS_CONNECTIONSTRING=$(Arcus.Worker.ServiceBus.Queue.ConnectionString)
-                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus.ApplicationInsights.InstrumentationKey)
+                EVENTHUBS_NAME=$(Arcus.EventHubs.Name)
+                BLOBSTORAGE_CONTAINERNAME=$(Arcus.StorageAccount.Container.Name)
+                ARCUS_EVENTHUBS_CONNECTIONSTRING=$(Arcus_EventHubs_ConnectionString)
+                ARCUS_STORAGEACCOUNT_CONNECTIONSTRING=$(Arcus_StorageAccount_ConnectionString)
+                ARCUS_SERVICEBUS_CONNECTIONSTRING=$(Arcus_ServiceBus_Queue_ConnectionString)
+                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus_AppInsights_InstrumentationKey)
           - template: 'run-new-project-from-template.yml'
             parameters:
               projectName: 'Arcus.Demo.AzureFunctions.Isolated.Http'
@@ -92,7 +92,7 @@ stages:
                    % { $_ -replace '#error', '#warning' -replace '#if DEBUG', '#if RELEASE' } |
                   Set-Content './Arcus.Demo.AzureFunctions.Isolated.Http/Program.cs'
               envVars: |
-                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus.ApplicationInsights.InstrumentationKey)
+                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus_App_InstrumentationKey)
           - template: 'run-new-project-from-template.yml'
             parameters:
               projectName: 'Arcus.Demo.AzureFunctions.ServiceBus.Queue.Isolated'
@@ -103,8 +103,8 @@ stages:
                    % { $_ -replace '#error', '#warning' -replace '#if DEBUG', '#if RELEASE' } |
                   Set-Content './Arcus.Demo.AzureFunctions.ServiceBus.Queue.Isolated/Program.cs'
               envVars: |
-                ServiceBusConnectionString=$(Arcus.Worker.ServiceBus.Queue.ConnectionString)
-                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus.ApplicationInsights.InstrumentationKey)
+                ServiceBusConnectionString=$(Arcus_ServiceBus_Queue_ConnectionString)
+                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus_App_InstrumentationKey)
           - template: 'run-new-project-from-template.yml'
             parameters:
               projectName: 'Arcus.Demo.AzureFunctions.ServiceBus.Topic.Isolated'
@@ -115,8 +115,8 @@ stages:
                   % { $_ -replace '#error', '#warning' -replace '#if DEBUG', '#if RELEASE' } |
                   Set-Content './Arcus.Demo.AzureFunctions.ServiceBus.Topic.Isolated/Program.cs'
               envVars: |
-                ServiceBusConnectionString=$(Arcus.Worker.ServiceBus.Topic.ConnectionString)
-                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus.ApplicationInsights.InstrumentationKey)
+                ServiceBusConnectionString=$(Arcus_ServiceBus_Topic_ConnectionString)
+                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus_App_InstrumentationKey)
           - template: 'run-new-project-from-template.yml'
             parameters:
               projectName: 'Arcus.Demo.AzureFunctions.EventHubs.Isolated'
@@ -130,9 +130,9 @@ stages:
                   % { $_ -replace 'sensors', '$(Arcus.EventHubs.Docker.EventHubsName)' } |
                   Set-Content './Arcus.Demo.AzureFunctions.EventHubs.Isolated/SensorReadingFunction.cs'
               envVars: |
-                EventHubsConnectionString=$(Arcus.EventHubs.ConnectionString)
-                AzureWebJobsStorage=$(Arcus.EventHubs.BlobStorage.StorageAccountConnectionString)
-                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus.ApplicationInsights.InstrumentationKey)
+                EventHubsConnectionString=$(Arcus_EventHubs_ConnectionString)
+                AzureWebJobsStorage=$(Arcus_StorageAccount_ConnectionString)
+                APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$(Arcus_App_InstrumentationKey)
           - template: test/run-integration-tests.yml@templates
             parameters:
               dotnetSdkVersion: '$(DotNet.Sdk.Version)'
