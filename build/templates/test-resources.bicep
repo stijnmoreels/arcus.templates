@@ -58,7 +58,7 @@ module serviceBus_namespace 'br/public:avm/res/service-bus/namespace:0.5.0' = {
   ]
   scope: rg
   params: {
-    name: 'arcus-templates-dev-we-sb'
+    name: 'arcus-templates-dev-we-sb-ns'
     location: location
     skuObject: {
       name: 'Standard'
@@ -112,7 +112,7 @@ module eventHubs_namespace 'br/public:avm/res/event-hub/namespace:0.2.2' = {
   ]
   scope: rg
   params: {
-    name: 'arcus-templates-dev-we-eh'
+    name: 'arcus-templates-dev-we-eh-ns'
     location: location
     skuName: 'Basic'
     skuCapacity: 1
