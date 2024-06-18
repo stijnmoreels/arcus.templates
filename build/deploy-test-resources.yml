@@ -23,7 +23,8 @@ resources:
       endpoint: arcus-azure
 
 variables:
-  - template: variables/test.yml
+  - template: ./variables/build.yml
+  - template: ./variables/test.yml
 
 stages:
   - stage: Deploy
