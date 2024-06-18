@@ -65,15 +65,6 @@ module serviceBus_namespace 'br/public:avm/res/service-bus/namespace:0.5.0' = {
   }
   topics: [ { name: topicName } ]
   queues: [ { name: queueName } ]
-  authorizationRules: [
-    {
-      name: 'SendListenAccessKey'
-      rights: [
-        'Send'
-        'Listen'
-      ]
-    }
-  ]
  }
 }
 
@@ -122,15 +113,6 @@ module eventHubs_namespace 'br/public:avm/res/event-hub/namespace:0.2.2' = {
       {
         name: eventHubsName
         partitionCount: 2
-      }
-    ]
-    authorizationRules: [
-      {
-        name: 'SendListenAccessKey'
-        rights: [ 
-          'Send'
-          'Listen'
-        ]
       }
     ]
   }
@@ -190,15 +172,15 @@ module vault 'br/public:avm/res/key-vault/vault:0.6.1' = {
       }
       {
         name: topicConnectionString_secretName
-        value: '${listKeys(serviceBus_ns.id, 'SendListenAccessKey').primaryConnectionString};EntityPath=${topicName}'
+        value: '${listKeys(serviceBus_ns.id, 'RootManageSharedAccessKey').primaryConnectionString};EntityPath=${topicName}'
       }
       {
         name: queueConnectionString_secretName
-        value: '${listKeys(serviceBus_ns.id, 'SendListenAccessKey').primaryConnectionString};EntityPath=${queueName}'
+        value: '${listKeys(serviceBus_ns.id, 'RootManageSharedAccessKey').primaryConnectionString};EntityPath=${queueName}'
       }
       {
         name: eventHubsConnectionString_secretName
-        value: '${listKeys(eventHubs_ns.id, 'SendListenAccessKey').primaryConnectionString}'
+        value: '${listKeys(eventHubs_ns.id, 'RootManageSharedAccessKey').primaryConnectionString}'
       }
       {
         name: storageAccountConnectionString_secretName
