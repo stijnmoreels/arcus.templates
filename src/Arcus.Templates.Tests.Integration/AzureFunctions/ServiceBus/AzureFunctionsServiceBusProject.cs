@@ -138,10 +138,10 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
             AddTypeAsFile<Customer>();
             AddTypeAsFile<OrderCreatedEventData>();
 
-            AddTypeAsFile<WriteToFileMessageHandler>();
+            AddTypeAsFile<WriteOrderToDiskMessageHandler>();
             UpdateFileInProject(RuntimeFileName, contents =>
                 RemovesUserErrorsFromContents(contents)
-                    .Replace("OrdersAzureServiceBusMessageHandler", nameof(WriteToFileMessageHandler))); 
+                    .Replace("OrdersAzureServiceBusMessageHandler", nameof(WriteOrderToDiskMessageHandler))); 
         }
 
         private async Task StartAsync(ServiceBusEntityType entityType)

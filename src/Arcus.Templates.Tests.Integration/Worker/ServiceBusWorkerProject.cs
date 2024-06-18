@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Arcus.Messaging.Pumps.ServiceBus;
 using Arcus.Templates.Tests.Integration.Fixture;
-using Arcus.Templates.Tests.Integration.Worker.Configuration;
 using Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture;
 using GuardNet;
 using Microsoft.Extensions.Logging;
@@ -179,12 +178,12 @@ namespace Arcus.Templates.Tests.Integration.Worker
             AddTypeAsFile<Order>();
             AddTypeAsFile<Customer>();
             AddTypeAsFile<OrderCreatedEventData>();
-            AddTypeAsFile<WriteToFileMessageHandler>();
+            AddTypeAsFile<WriteOrderToDiskMessageHandler>();
             
             UpdateFileInProject("Program.cs", contents => 
                 RemovesUserErrorsFromContents(contents)
                     .Replace(".MinimumLevel.Debug()", ".MinimumLevel.Verbose()")
-                    .Replace("EmptyMessageHandler", nameof(WriteToFileMessageHandler))
+                    .Replace("EmptyMessageHandler", nameof(WriteOrderToDiskMessageHandler))
                     .Replace("EmptyMessage", nameof(Order))
                     .Replace("stores.AddAzureKeyVaultWithManagedIdentity(\"https://your-keyvault.vault.azure.net/\", CacheConfiguration.Default);", ""));
         }

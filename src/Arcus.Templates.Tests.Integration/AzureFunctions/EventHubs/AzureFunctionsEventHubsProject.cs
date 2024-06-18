@@ -21,7 +21,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
             ITestOutputHelper outputWriter)
             : base(config.GetAzureFunctionsEventHubsProjectDirectory(), config, options, outputWriter)
         {
-            Messaging = new TestEventHubsMessagePumpService(config, outputWriter);
+            Messaging = new TestEventHubsMessagePumpService(config, ProjectDirectory, outputWriter);
         }
 
         /// <summary>
@@ -108,12 +108,10 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
 
         private void AddTestMessageHandler(EventHubsConfig eventHubsConfig)
         {
-            AddPackage("Azure.Messaging.EventGrid", "4.11.0");
-
             AddTypeAsFile<SensorUpdate>();
             AddTypeAsFile<SensorStatus>();
             AddTypeAsFile<SensorUpdateEventData>();
-            AddTypeAsFile<TestSensorUpdateAzureEventHubsMessageHandler>();
+            AddTypeAsFile<WriteSensorUpdateToDiskMessageHandler>();
 
             UpdateFileInProject("SensorReadingFunction.cs", 
                 contents => contents.Replace("EventHubTrigger(\"sensors\"", $"EventHubTrigger(\"{eventHubsConfig.EventHubsName}\""));
@@ -121,7 +119,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
             UpdateFileInProject(RuntimeFileName, contents => 
                 RemovesUserErrorsFromContents(contents)
                     .Replace(".MinimumLevel.Debug()", ".MinimumLevel.Verbose()")
-                    .Replace("SensorReadingAzureEventHubsMessageHandler", nameof(TestSensorUpdateAzureEventHubsMessageHandler))
+                    .Replace("SensorReadingAzureEventHubsMessageHandler", nameof(WriteSensorUpdateToDiskMessageHandler))
                     .Replace("SensorReading", nameof(SensorUpdate))
                     .Replace("stores.AddAzureKeyVaultWithManagedIdentity(\"https://your-keyvault.vault.azure.net/\", CacheConfiguration.Default);", ""));
         }
@@ -131,17 +129,12 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
             try
             {
                 EventHubsConfig eventHubsConfig = Configuration.GetEventHubsConfig();
-                EventGridConfig eventGridConfig = Configuration.GetEventGridConfig();
-
                 Environment.SetEnvironmentVariable("EventHubsConnectionString", eventHubsConfig.EventHubsConnectionString);
-                Environment.SetEnvironmentVariable("EVENTGRID_TOPIC_URI", eventGridConfig.TopicUri);
-                Environment.SetEnvironmentVariable("EVENTGRID_AUTH_KEY", eventGridConfig.AuthenticationKey);
 
                 ApplicationInsightsConfig appInsightsConfig = Configuration.GetApplicationInsightsConfig();
                 Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", $"InstrumentationKey={appInsightsConfig.InstrumentationKey}");
 
                 Run(Configuration.BuildConfiguration, TargetFramework.Net8_0);
-                await Messaging.StartAsync();
             }
             catch
             {
@@ -157,12 +150,9 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
         public async ValueTask DisposeAsync()
         {
             Environment.SetEnvironmentVariable("EventHubsConnectionString", null);
-            Environment.SetEnvironmentVariable("EVENTGRID_TOPIC_URI", null);
-            Environment.SetEnvironmentVariable("EVENTGRID_AUTH_KEY", null);
             Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", null);
 
             Dispose();
-            await Messaging.DisposeAsync();
         }
     }
 }

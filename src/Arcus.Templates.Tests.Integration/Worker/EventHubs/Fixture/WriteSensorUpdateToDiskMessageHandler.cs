@@ -1,30 +1,25 @@
 ﻿using System;
+using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Arcus.Messaging.Abstractions;
 using Arcus.Messaging.Abstractions.EventHubs;
 using Arcus.Messaging.Abstractions.EventHubs.MessageHandling;
-using Azure.Messaging.EventGrid;
-using Azure;
 using Azure.Messaging;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture
 {
-    public class TestSensorUpdateAzureEventHubsMessageHandler : IAzureEventHubsMessageHandler<SensorUpdate>
+    public class WriteSensorUpdateToDiskMessageHandler : IAzureEventHubsMessageHandler<SensorUpdate>
     {
         private readonly ILogger _logger;
-        private readonly EventGridPublisherClient _eventGridPublisher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TestSensorUpdateAzureEventHubsMessageHandler" /> class.
+        /// Initializes a new instance of the <see cref="WriteSensorUpdateToDiskMessageHandler" /> class.
         /// </summary>
-        public TestSensorUpdateAzureEventHubsMessageHandler(IConfiguration configuration, ILogger<TestSensorUpdateAzureEventHubsMessageHandler> logger)
+        public WriteSensorUpdateToDiskMessageHandler(ILogger<WriteSensorUpdateToDiskMessageHandler> logger)
         {
-            var eventGridTopic = configuration.GetValue<string>("EVENTGRID_TOPIC_URI");
-            var eventGridKey = configuration.GetValue<string>("EVENTGRID_AUTH_KEY");
-            _eventGridPublisher = new EventGridPublisherClient(new Uri(eventGridTopic), new AzureKeyCredential(eventGridKey));
             _logger = logger;
         }
 
@@ -36,12 +31,12 @@ namespace Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture
         {
             _logger.LogInformation("Processing sensor reading {SensorId} for status {SensorStatus} on {Timestamp}", message.SensorId, message.SensorStatus, message.Timestamp);
 
-            await PublishEventToEventGridAsync(message, correlationInfo);
+            await PublishEventToDiskAsync(message, correlationInfo);
 
             _logger.LogInformation("Sensor {SensorId} processed", message.SensorId);
         }
 
-        private async Task PublishEventToEventGridAsync(SensorUpdate message, MessageCorrelationInfo correlationInfo)
+        private async Task PublishEventToDiskAsync(SensorUpdate message, MessageCorrelationInfo correlationInfo)
         {
             var eventData = new SensorUpdateEventData
             {
@@ -60,7 +55,13 @@ namespace Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture
                 Time = DateTimeOffset.UtcNow
             };
 
-            await _eventGridPublisher.SendEventAsync(orderCreatedEvent);
+            string json = JsonSerializer.Serialize(eventData);
+            var fileName = $"{correlationInfo.TransactionId}.json";
+            _logger.LogTrace("Processed message by writing on disk: {FileName}", fileName);
+
+            string currentDirPath = Directory.GetCurrentDirectory();
+            string filePath = Path.Combine(currentDirPath, fileName);
+            await File.WriteAllTextAsync(filePath, json);
 
             _logger.LogInformation("Event {EventId} was published with subject {EventSubject}", orderCreatedEvent.Id, orderCreatedEvent.Subject);
         }

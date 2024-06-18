@@ -36,11 +36,9 @@ namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
             _logger = new XunitTestLogger(outputWriter);
         }
 
-        public Task StartAsync()
-        {
-            return Task.CompletedTask;
-        }
-
+        /// <summary>
+        /// Simulate the message processing of the message pump using the Service Bus.
+        /// </summary>
         public async Task SimulateMessageProcessingAsync()
         {
             var traceParent = TraceParent.Generate();
@@ -122,11 +120,6 @@ namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
                     "Failed to retrieve the necessary produced message from the temporary project created from the worker project template, " +
                     "please check whether the injected message handler was correct and if the created project correctly receives the message", ex);
             }
-        }
-
-        public ValueTask DisposeAsync()
-        {
-           return ValueTask.CompletedTask;
         }
     }
 }

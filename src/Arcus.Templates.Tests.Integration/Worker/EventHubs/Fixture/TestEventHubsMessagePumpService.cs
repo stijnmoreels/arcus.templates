@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Arcus.Templates.Tests.Integration.Fixture;
 using Arcus.Templates.Tests.Integration.Logging;
@@ -7,6 +8,8 @@ using Azure.Messaging.EventHubs;
 using Azure.Messaging.EventHubs.Producer;
 using Bogus;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Polly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,46 +18,32 @@ namespace Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture
     public class TestEventHubsMessagePumpService : IMessagingService
     {
         private readonly TestConfig _configuration;
+        private readonly DirectoryInfo _projectDirectory;
         private readonly ILogger _logger;
-
-        private TestServiceBusMessageEventConsumer _serviceBusMessageEventConsumer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestEventHubsMessagePumpService" /> class.
         /// </summary>
         public TestEventHubsMessagePumpService(
             TestConfig configuration,
+            DirectoryInfo projectDirectory,
             ITestOutputHelper outputWriter)
         {
             _configuration = configuration;
+            _projectDirectory = projectDirectory;
             _logger = new XunitTestLogger(outputWriter);
         }
 
-        public async Task StartAsync()
-        {
-            if (_serviceBusMessageEventConsumer is null)
-            {
-                _serviceBusMessageEventConsumer = await TestServiceBusMessageEventConsumer.StartNewAsync(_configuration, _logger);
-            }
-            else
-            {
-                throw new InvalidOperationException("Service is already started!");
-            }
-        }
-
+        /// <summary>
+        /// Simulate the message processing of the message pump using the Service Bus.
+        /// </summary>
         public async Task SimulateMessageProcessingAsync()
         {
-            if (_serviceBusMessageEventConsumer is null)
-            {
-                throw new InvalidOperationException(
-                    "Cannot simulate the message pump because the service is not yet started; please start this service before simulating");
-            }
-
             var traceParent = TraceParent.Generate();
             SensorUpdate update = GenerateSensorReading();
             await ProduceEventAsync(update, traceParent);
 
-            var sensorReadEventData = _serviceBusMessageEventConsumer.ConsumeEvent<SensorUpdateEventData>(traceParent.TransactionId);
+            SensorUpdateEventData sensorReadEventData = await ConsumeMessageAsync(traceParent);
             Assert.NotNull(sensorReadEventData);
             Assert.NotNull(sensorReadEventData.CorrelationInfo);
             Assert.Equal(update.SensorId, sensorReadEventData.SensorId);
@@ -86,11 +75,30 @@ namespace Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture
             }
         }
 
-        public async ValueTask DisposeAsync()
+        private async Task<SensorUpdateEventData> ConsumeMessageAsync(TraceParent traceParent)
         {
-            if (_serviceBusMessageEventConsumer != null)
+            try
             {
-                await _serviceBusMessageEventConsumer.DisposeAsync();
+                _logger.LogTrace("Consumes a message with transaction ID: {TransactionId}", traceParent.TransactionId);
+
+                FileInfo[] foundFiles =
+                    Policy.Timeout(TimeSpan.FromMinutes(1))
+                          .Wrap(Policy.HandleResult((FileInfo[] files) => files.Length <= 0)
+                                      .WaitAndRetryForever(_ => TimeSpan.FromMilliseconds(200)))
+                          .Execute(() => _projectDirectory.GetFiles(traceParent.TransactionId + ".json", SearchOption.AllDirectories));
+
+                FileInfo found = Assert.Single(foundFiles);
+                string json = await File.ReadAllTextAsync(found.FullName);
+                var settings = new JsonSerializerSettings();
+                settings.Converters.Add(new MessageCorrelationInfoJsonConverter());
+
+                return JsonConvert.DeserializeObject<SensorUpdateEventData>(json, settings);
+            }
+            catch (TimeoutException ex)
+            {
+                throw new TimeoutException(
+                    "Failed to retrieve the necessary produced message from the temporary project created from the worker project template, " +
+                    "please check whether the injected message handler was correct and if the created project correctly receives the message", ex);
             }
         }
     }

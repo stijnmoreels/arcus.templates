@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using Arcus.Templates.Tests.Integration.AzureFunctions.Configuration;
 using Arcus.Templates.Tests.Integration.AzureFunctions.Http.Configuration;
-using Arcus.Templates.Tests.Integration.Worker.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using GuardNet;
@@ -272,18 +271,6 @@ namespace Arcus.Templates.Tests.Integration.Fixture
             const string key = "Arcus:Api:ApplicationInsights:InstrumentationKey";
 
             return _configuration.GetValue<string>(key);
-        }
-
-        /// <summary>
-        /// Gets the configuration model to use an Azure Event Grid resource.
-        /// </summary>
-        /// <exception cref="KeyNotFoundException">Thrown when one or more configuration values cannot be found.</exception>
-        public EventGridConfig GetEventGridConfig()
-        {
-            var eventGridTopicUri = _configuration.GetRequiredValue<string>("Arcus:Worker:EventGrid:TopicUri");
-            var eventGridAuthKey = _configuration.GetRequiredValue<string>("Arcus:Worker:EventGrid:AuthKey");
-
-            return new EventGridConfig(eventGridTopicUri, eventGridAuthKey);
         }
 
         /// <summary>

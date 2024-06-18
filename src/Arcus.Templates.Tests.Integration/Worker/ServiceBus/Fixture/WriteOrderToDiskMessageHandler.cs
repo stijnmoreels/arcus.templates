@@ -9,14 +9,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
 {
-    public class WriteToFileMessageHandler : IAzureServiceBusMessageHandler<Order>
+    public class WriteOrderToDiskMessageHandler : IAzureServiceBusMessageHandler<Order>
     {
-        private readonly ILogger<WriteToFileMessageHandler> _logger;
+        private readonly ILogger<WriteOrderToDiskMessageHandler> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WriteToFileMessageHandler" /> class.
+        /// Initializes a new instance of the <see cref="WriteOrderToDiskMessageHandler" /> class.
         /// </summary>
-        public WriteToFileMessageHandler(ILogger<WriteToFileMessageHandler> logger)
+        public WriteOrderToDiskMessageHandler(ILogger<WriteOrderToDiskMessageHandler> logger)
         {
             _logger = logger;
         }
