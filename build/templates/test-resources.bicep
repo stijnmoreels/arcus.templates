@@ -60,6 +60,7 @@ module serviceBus_namespace 'br/public:avm/res/service-bus/namespace:0.5.0' = {
   params: {
     name: 'arcus-templates-dev-we-sb-ns'
     location: location
+    disableLocalAuth: false
     skuObject: {
       name: 'Standard'
   }
@@ -107,6 +108,7 @@ module eventHubs_namespace 'br/public:avm/res/event-hub/namespace:0.2.2' = {
   params: {
     name: 'arcus-templates-dev-we-eh-ns'
     location: location
+    disableLocalAuth: false
     skuName: 'Basic'
     skuCapacity: 1
     eventhubs: [
