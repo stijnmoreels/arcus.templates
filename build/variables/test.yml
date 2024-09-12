@@ -1,6 +1,7 @@
 variables:
   Arcus.Templates.ResourceGroup.Name: 'arcus-templates-dev-we-rg'
 
+  Arcus.Templates.ServiceBus.Namespace: 'arcus-templates-servicebus'
   Arcus.Templates.ServiceBus.QueueName: 'orders-queue'
   Arcus.Templates.ServiceBus.TopicName: 'orders-topic'
 
