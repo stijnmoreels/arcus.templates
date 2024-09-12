@@ -50,7 +50,6 @@ stages:
                 $objectId = (az ad sp show --id $env:servicePrincipalId | ConvertFrom-Json).id
                 az deployment group create `
                   --resource-group $env:ARCUS_TEMPLATES_RESOURCEGROUP_NAME `
-                  --location westeurope `
                   --template-file ./build/templates/test-resources.bicep `
                   --parameters location=westeurope `
                   --parameters keyVaultName=${{ parameters.keyVaultName }} `
