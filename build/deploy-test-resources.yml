@@ -13,7 +13,7 @@ parameters:
     default: arcus-templates-dev-we-rg
   - name: keyVaultName
     displayName: 'Key vault name'
-    value: 'arcus-templates-kv'
+    default: 'arcus-templates-kv'
 
 variables:
   - template: ./variables/build.yml
