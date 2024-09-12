@@ -1,10 +1,10 @@
 variables:
   Arcus.Templates.ResourceGroup.Name: 'arcus-templates-dev-we-rg'
 
-  Arcus.Templates.ServiceBus.Namespace: 'arcus-templates-servicebus'
+  Arcus.Templates.ServiceBus.Namespace: 'arcus-templates-dev-we-sb-ns'
   Arcus.Templates.ServiceBus.QueueName: 'orders-queue'
   Arcus.Templates.ServiceBus.TopicName: 'orders-topic'
-  Arcus.Templates.ApplicationInsights.Name: 'arcus-templates-insights'
+  Arcus.Templates.ApplicationInsights.Name: 'arcus-templates-dev-we-app-insights'
   Arcus.Templates.ApplicationInsights.ConnectionString.SecretName: 'appinsights-connectionstring'
 
   Http.Port: '5000'
