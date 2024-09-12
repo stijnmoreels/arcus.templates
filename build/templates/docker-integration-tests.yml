@@ -1,3 +1,6 @@
+parameters:
+  azureServiceConnection: ''
+
 stages:
   - stage: DockerIntegrationTests
     displayName: Docker Integration Tests
@@ -9,6 +12,9 @@ stages:
         pool:
           vmImage: '$(Vm.Image)'
         steps:
+          - template: templates/import-keyvault-secrets.yml
+            parameters:
+              azureServiceConnection: ${{ parameters.azureServiceConnection }}
           - task: DownloadPipelineArtifact@2
             displayName: 'Download build artifacts'
             inputs:

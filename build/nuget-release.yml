@@ -6,6 +6,10 @@ pr: none
 parameters:
   - name: 'Package.Version'
     type: 'string'
+  - name: azureServiceConnection
+    displayName: 'Azure service connection'
+    type: string
+    default: 'Azure Codit-Arcus Service Principal'
 
 resources:
   repositories:
@@ -75,6 +79,9 @@ stages:
         steps:
           - task: FuncToolsInstaller@0
             displayName: 'Install Azure Functions Core tools'
+          - template: templates/import-keyvault-secrets.yml
+            parameters:
+              azureServiceConnection: ${{ parameters.azureServiceConnection }}
           - template: test/run-integration-tests.yml@templates
             parameters:
               dotnetSdkVersion: '$(DotNet.Sdk.Version)'

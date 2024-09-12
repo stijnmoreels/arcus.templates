@@ -1,4 +1,9 @@
 variables:
+  Arcus.Templates.ResourceGroup.Name: 'arcus-templates-dev-we-rg'
+
+  Arcus.Templates.ServiceBus.QueueName: 'orders-queue'
+  Arcus.Templates.ServiceBus.TopicName: 'orders-topic'
+
   Http.Port: '5000'
   Arcus.Api.BaseUrl: 'http://localhost:$(Http.Port)/api/v1'
   Arcus.ServiceBus.Queue.Worker.HealthPort: '42065'
@@ -7,9 +12,7 @@ variables:
   Arcus.EventHubs.Docker.EventHubsName: 'orders-docker'
   Arcus.EventHubs.SelfContained.EventHubsName: 'orders'
   Arcus.EventHubs.Docker.BlobStorage.ContainerName: 'eventhubs-docker'
-  Arcus.Databricks.JobId: 9
-  Arcus.AzureFunctions.ApplicationInsights.MetricName: 'Databricks Job Completed'
-  Arcus.AzureFunctions.Databricks.HttpPort: '5050'
+
   Arcus.AzureFunctions.Http.InProcess.HttpPort: '6060'
   Arcus.AzureFunctions.Http.Isolated.HttpPort: '6061'
   Arcus.AzureFunctions.ServiceBus.Queue.InProcess.Port: '42067'

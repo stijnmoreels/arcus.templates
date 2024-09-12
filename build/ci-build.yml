@@ -18,6 +18,10 @@ parameters:
   - name: 'Package.Version.ManualTrigger'
     type: string
     default: 'preview'
+  - name: azureServiceConnection
+    displayName: 'Azure service connection'
+    type: string
+    default: 'Azure Codit-Arcus Service Principal'
 
 resources:
   repositories:
@@ -30,9 +34,7 @@ variables:
   - group: 'Build Configuration'
   - group: 'Arcus Templates - Integration Testing'
   - group: 'Arcus Web Api - Integration Testing'
-  # We are re-using the Event Grid integration infrastructure
   - group: 'Arcus Messaging - Integration Testing'
-  - group: 'Arcus Background Jobs - Integration Testing'
   - template: ./variables/build.yml
   - template: ./variables/test.yml
 
@@ -76,6 +78,8 @@ stages:
               artifactName: Templates
 
   - template: 'templates/docker-integration-tests.yml'
+    parameters:
+      azureServiceConnection: ${{ parameters.azureServiceConnection }}
     
   - stage: SelfContainingIntegrationTests
     displayName: Self-Containing Integration Tests
@@ -89,6 +93,9 @@ stages:
         steps:
           - task: FuncToolsInstaller@0
             displayName: 'Install Azure Functions Core tools'
+          - template: templates/import-keyvault-secrets.yml
+            parameters:
+              azureServiceConnection: ${{ parameters.azureServiceConnection }}
           - template: test/run-integration-tests.yml@templates
             parameters:
               dotnetSdkVersion: '$(DotNet.Sdk.Version)'
