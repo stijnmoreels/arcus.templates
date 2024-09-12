@@ -16,6 +16,9 @@ param appInsightsName string
 // Define the name of the Key Vault.
 param keyVaultName string
 
+// Define the name of the Azure Key vault secret that holds the Application Insights connection string.
+param appInsights_connectionString_secretName string
+
 // Define the Service Principal ID that needs access full access to the deployed resource group.
 param servicePrincipal_objectId string
 
@@ -58,22 +61,28 @@ module serviceBus 'br/public:avm/res/service-bus/namespace:0.8.0' = {
   }
 }
 
-// module workspace 'br/public:avm/res/operational-insights/workspace:0.7.0' = {
-//   name: 'workspaceDeployment'
-//   params: {
-//     name: '${appInsightsName}-workspace'
+module workspace 'br/public:avm/res/operational-insights/workspace:0.3.4' = {
+  name: 'workspaceDeployment'
+  params: {
+    name: '${appInsightsName}-workspace'
+    location: location
+  }
+}
 
-//   }
-// }
-
-// module insights 'br/public:avm/res/insights/component:0.4.1' = {
-//   name: 'insightsDeployment'
-//   params: {
-//     name: appInsightsName
-//     kind: 'other'
-//     workspaceResourceId: workspace.outputs.resourceId
-//   }
-// }
+module component 'br/public:avm/res/insights/component:0.3.0' = {
+  name: 'componentDeployment'
+  params: {
+    name: appInsightsName
+    workspaceResourceId: workspace.outputs.resourceId
+    location: location
+    roleAssignments: [
+      {
+        principalId: servicePrincipal_objectId
+        roleDefinitionIdOrName: '73c42c96-874c-492b-b04d-ab87d138a893' // Log Analytics Reader
+      }
+    ]
+  }
+}
 
 module vault 'br/public:avm/res/key-vault/vault:0.6.1' = {
   name: 'vaultDeployment'
@@ -87,6 +96,10 @@ module vault 'br/public:avm/res/key-vault/vault:0.6.1' = {
       }
     ]
     secrets: [
+      {
+        name: appInsights_connectionString_secretName
+        value: component.outputs.connectionString
+      }
     ]
   }
 }

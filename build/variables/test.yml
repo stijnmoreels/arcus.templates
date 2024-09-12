@@ -4,6 +4,8 @@ variables:
   Arcus.Templates.ServiceBus.Namespace: 'arcus-templates-servicebus'
   Arcus.Templates.ServiceBus.QueueName: 'orders-queue'
   Arcus.Templates.ServiceBus.TopicName: 'orders-topic'
+  Arcus.Templates.ApplicationInsights.Name: 'arcus-templates-insights'
+  Arcus.Templates.ApplicationInsights.ConnectionString.SecretName: 'appinsights-connectionstring'
 
   Http.Port: '5000'
   Arcus.Api.BaseUrl: 'http://localhost:$(Http.Port)/api/v1'

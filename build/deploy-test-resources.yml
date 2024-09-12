@@ -55,5 +55,6 @@ stages:
                   --parameters serviceBusNamespace=$env:ARCUS_TEMPLATES_SERVICEBUS_NAMESPACE `
                   --parameters serviceBus_queueName=$env:ARCUS_TEMPLATES_SERVICEBUS_QUEUENAME `
                   --parameters serviceBus_topicName=$env:ARCUS_TEMPLATES_SERVICEBUS_TOPICNAME `
+                  --parameters appInsightsName=$env:ARCUS_TEMPLATES_APPLICATIONINSIGHTS_NAME `
                   --parameters keyVaultName=${{ parameters.keyVaultName }} `
                   --parameters servicePrincipal_objectId=$objectId
