@@ -19,6 +19,9 @@ param keyVaultName string
 // Define the name of the Azure Key vault secret that holds the Application Insights connection string.
 param appInsights_connectionString_secretName string
 
+// Define the name of the Azure Key vault secret that holds the workspace ID of the Log Analytics workspace that hosts the Application Insights resource.
+param appInsights_logAnalytics_workspaceId_secretName string
+
 // Define the Service Principal ID that needs access full access to the deployed resource group.
 param servicePrincipal_objectId string
 
@@ -99,6 +102,10 @@ module vault 'br/public:avm/res/key-vault/vault:0.6.1' = {
       {
         name: appInsights_connectionString_secretName
         value: component.outputs.connectionString
+      }
+      {
+        name: appInsights_logAnalytics_workspaceId_secretName
+        value: workspace.outputs.logAnalyticsWorkspaceId
       }
     ]
   }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Arcus.Templates.Tests.Integration.AzureFunctions.Admin;
+using Arcus.Templates.Tests.Integration.Configuration;
 using Arcus.Templates.Tests.Integration.Fixture;
 using Arcus.Templates.Tests.Integration.Worker.Configuration;
 using Arcus.Templates.Tests.Integration.Worker.Fixture;
@@ -148,19 +150,16 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
         {
             try
             {
-                string serviceBusConnectionString = Configuration.GetServiceBusConnectionString(entityType);
-                var properties = ServiceBusConnectionStringProperties.Parse(serviceBusConnectionString);
-                string namespaceConnectionString = $"Endpoint={properties.Endpoint};SharedAccessKeyName={properties.SharedAccessKeyName};SharedAccessKey={properties.SharedAccessKey}";
-                Environment.SetEnvironmentVariable("ServiceBusConnectionString", namespaceConnectionString);
+                ServiceBusConfig serviceBus = Configuration.GetServiceBus();
+                Environment.SetEnvironmentVariable("ServiceBusConnection__fullyQualifiedNamespace", serviceBus.FullyQualifiedNamespace);
 
                 if (entityType is ServiceBusEntityType.Topic)
                 {
-                    await AddServiceBusTopicSubscriptionAsync(properties.EntityPath, namespaceConnectionString);
+                    await AddServiceBusTopicSubscriptionAsync(serviceBus);
                 }
 
-                string instrumentationKey = Configuration.GetApplicationInsightsInstrumentationKey();
-                Environment.SetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY", instrumentationKey);
-                Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", $"InstrumentationKey={instrumentationKey}");
+                AppInsightsConfig appInsights = Configuration.GetAppInsights();
+                Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", appInsights.ConnectionString);
 
                 Run(Configuration.BuildConfiguration, TargetFramework.Net8_0);
                 await Messaging.StartAsync();
@@ -173,15 +172,15 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
             }
         }
 
-        private static async Task AddServiceBusTopicSubscriptionAsync(string topic, string connectionString)
+        private static async Task AddServiceBusTopicSubscriptionAsync(ServiceBusConfig serviceBus)
         {
-            var client = new ServiceBusAdministrationClient(connectionString);
+            var client = new ServiceBusAdministrationClient(serviceBus.FullyQualifiedNamespace, serviceBus.ServicePrincipal.GetCredential());
             var subscriptionName = "order-subscription";
 
-            Response<bool> subscriptionExists = await client.SubscriptionExistsAsync(topic, subscriptionName);
+            Response<bool> subscriptionExists = await client.SubscriptionExistsAsync(serviceBus.TopicName, subscriptionName);
             if (!subscriptionExists.Value)
             {
-                await client.CreateSubscriptionAsync(topic, subscriptionName);
+                await client.CreateSubscriptionAsync(serviceBus.TopicName, subscriptionName);
             }
         }
 

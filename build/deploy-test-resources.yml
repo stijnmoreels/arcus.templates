@@ -57,5 +57,6 @@ stages:
                   --parameters serviceBus_topicName=$env:ARCUS_TEMPLATES_SERVICEBUS_TOPICNAME `
                   --parameters appInsightsName=$env:ARCUS_TEMPLATES_APPLICATIONINSIGHTS_NAME `
                   --parameters appInsights_connectionString_secretName=$env:ARCUS_TEMPLATES_APPLICATIONINSIGHTS_CONNECTIONSTRING_SECRETNAME `
+                  --parameters appInsights_logAnalytics_workspaceId_secretName=$env:ARCUS_TEMPLATES_APPLICATIONINSIGHTS_LOGANALYTICS_WORKSPACEID_SECRETNAME `
                   --parameters keyVaultName=${{ parameters.keyVaultName }} `
                   --parameters servicePrincipal_objectId=$objectId

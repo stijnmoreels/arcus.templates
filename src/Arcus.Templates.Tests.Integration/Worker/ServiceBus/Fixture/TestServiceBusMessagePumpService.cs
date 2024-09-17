@@ -1,16 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Arcus.Templates.Tests.Integration.Configuration;
 using Arcus.Templates.Tests.Integration.Fixture;
 using Arcus.Templates.Tests.Integration.Logging;
 using Arcus.Templates.Tests.Integration.Worker.Fixture;
+using Arcus.Testing;
 using Azure.Messaging.ServiceBus;
 using Bogus;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
+using TestConfig = Arcus.Templates.Tests.Integration.Fixture.TestConfig;
 
 namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
 {
@@ -80,20 +82,19 @@ namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
             var message = new ServiceBusMessage(BinaryData.FromObjectAsJson(order));
             message.ApplicationProperties["Diagnostic-Id"] = traceParent.DiagnosticId;
 
-            string connectionString = _configuration.GetServiceBusConnectionString(_entityType);
-            var connectionStringProperties = ServiceBusConnectionStringProperties.Parse(connectionString);
-            await using (var client = new ServiceBusClient(connectionString))
-            {
-                ServiceBusSender messageSender = client.CreateSender(connectionStringProperties.EntityPath);
+            ServiceBusConfig serviceBusConfig = _configuration.GetServiceBus();
+            await using var client = new ServiceBusClient(serviceBusConfig.FullyQualifiedNamespace, serviceBusConfig.ServicePrincipal.GetCredential());
+            
+            string entityPath = serviceBusConfig.GetEntityPath(_entityType);
+            await using ServiceBusSender messageSender = client.CreateSender(entityPath);
 
-                try
-                {
-                    await messageSender.SendMessageAsync(message);
-                }
-                finally
-                {
-                    await messageSender.CloseAsync();
-                }
+            try
+            {
+                await messageSender.SendMessageAsync(message);
+            }
+            finally
+            {
+                await messageSender.CloseAsync();
             }
         }
 
@@ -104,10 +105,10 @@ namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
                 _logger.LogTrace("Consumes a message with transaction ID: {TransactionId}", traceParent.TransactionId);
 
                 FileInfo[] foundFiles =
-                    Policy.Timeout(TimeSpan.FromMinutes(1))
-                          .Wrap(Policy.HandleResult((FileInfo[] files) => files.Length <= 0)
-                                      .WaitAndRetryForever(_ => TimeSpan.FromMilliseconds(200)))
-                          .Execute(() => _projectDirectory.GetFiles(traceParent.TransactionId + ".json", SearchOption.AllDirectories));
+                    await Poll.Target(() => _projectDirectory.GetFiles(traceParent.TransactionId + ".json", SearchOption.AllDirectories))
+                              .Until(files => files.Length > 0)
+                              .Every(TimeSpan.FromMilliseconds(200))
+                              .Timeout(TimeSpan.FromMinutes(1));
 
                 FileInfo found = Assert.Single(foundFiles);
                 string json = await File.ReadAllTextAsync(found.FullName);

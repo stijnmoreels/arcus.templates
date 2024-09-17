@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Arcus.Messaging.Pumps.ServiceBus;
+using Arcus.Templates.Tests.Integration.Configuration;
 using Arcus.Templates.Tests.Integration.Fixture;
 using Arcus.Templates.Tests.Integration.Worker.Configuration;
 using Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture;
@@ -14,6 +15,7 @@ namespace Arcus.Templates.Tests.Integration.Worker
     /// </summary>
     public class ServiceBusWorkerProject : WorkerProject
     {
+
         private ServiceBusWorkerProject(
             ServiceBusEntityType entityType,
             TestConfig configuration,
@@ -127,9 +129,11 @@ namespace Arcus.Templates.Tests.Integration.Worker
 
             ServiceBusWorkerProject project = CreateNew(entityType, configuration, options, outputWriter);
 
-            string serviceBusConnection = configuration.GetServiceBusConnectionString(entityType);
-
-            await project.StartAsync(options, CommandArgument.CreateSecret("ARCUS_SERVICEBUS_CONNECTIONSTRING", serviceBusConnection));
+            ServiceBusConfig serviceBus = configuration.GetServiceBus();
+            await project.StartAsync(options, 
+                CommandArgument.CreateOpen("ARCUS_SERVICEBUS_NAMESPACE", serviceBus.FullyQualifiedNamespace),
+                CommandArgument.CreateOpen("ARCUS_SERVICEBUS_QUEUENAME", serviceBus.QueueName),
+                CommandArgument.CreateOpen("ARCUS_SERVICEBUS_TOPICNAME", serviceBus.TopicName));
 
             return project;
         }
@@ -170,8 +174,8 @@ namespace Arcus.Templates.Tests.Integration.Worker
         {
             UpdateFileInProject("Program.cs",
                 contents => contents.Replace(
-                    "AddServiceBusTopicMessagePump(\"Receive-All\", \"ARCUS_SERVICEBUS_CONNECTIONSTRING\")",
-                    $"AddServiceBusTopicMessagePump(\"Receive-All\", \"ARCUS_SERVICEBUS_CONNECTIONSTRING\", opt => opt.TopicSubscription = {typeof(TopicSubscription).FullName}.{TopicSubscription.Automatic})"));
+                    "AddServiceBusTopicMessagePumpUsingManagedIdentityWithPrefix(topicName, subscriptionPrefix: \"receive-\", serviceBusNamespace)",
+                    $"AddServiceBusTopicMessagePumpUsingManagedIdentityWithPrefix(topicName, subscriptionPrefix: \"receive-\", serviceBusNamespace, configureMessagePump: opt => opt.TopicSubscription = {typeof(TopicSubscription).FullName}.{TopicSubscription.Automatic})"));
         }
 
         private void AddTestMessageHandler()

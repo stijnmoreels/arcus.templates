@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Arcus.Templates.Tests.Integration.Configuration;
 using Arcus.Templates.Tests.Integration.Fixture;
 using GuardNet;
 
@@ -62,7 +63,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         }
 
         /// <summary>
-        /// Adds the Serilog logging option to the web API project; writing both to the console and to Azure Application Insights.
+        /// Adds the Serilog logging option to the web API project; writing to the console.
         /// </summary>
         public WebApiProjectOptions WithSerilogLogging()
         {
@@ -73,11 +74,11 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         /// <summary>
         /// Adds the Serilog logging option to the web API project; writing both to the console and to Azure Application Insights.
         /// </summary>
-        /// <param name="applicationInsightsInstrumentationKey">The key to connect to the Azure Application Insights resource.</param>
-        public WebApiProjectOptions WithSerilogLogging(string applicationInsightsInstrumentationKey)
+        public WebApiProjectOptions WithSerilogLogging(TestConfig config)
         {
+            AppInsightsConfig appInsights = config.GetAppInsights();
             AddOption("--logging Serilog", 
-                CommandArgument.CreateSecret("APPLICATIONINSIGHTS_CONNECTION_STRING", $"InstrumentationKey={applicationInsightsInstrumentationKey}"));
+                CommandArgument.CreateSecret("APPLICATIONINSIGHTS_CONNECTION_STRING", appInsights.ConnectionString));
 
             return this;
         }

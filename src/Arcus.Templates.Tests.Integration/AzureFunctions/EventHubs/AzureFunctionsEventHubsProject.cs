@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Arcus.Templates.Tests.Integration.AzureFunctions.Admin;
 using Arcus.Templates.Tests.Integration.AzureFunctions.Configuration;
+using Arcus.Templates.Tests.Integration.Configuration;
 using Arcus.Templates.Tests.Integration.Fixture;
 using Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture;
 using Arcus.Testing;
@@ -113,8 +114,8 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
 
                 Environment.SetEnvironmentVariable("EventHubsConnectionString", eventHubsConfig.EventHubsConnectionString);
 
-                ApplicationInsightsConfig appInsightsConfig = Configuration.GetApplicationInsightsConfig();
-                Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", $"InstrumentationKey={appInsightsConfig.InstrumentationKey}");
+                AppInsightsConfig appInsightsConfig = Configuration.GetAppInsights();
+                Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", appInsightsConfig.ConnectionString);
 
                 Run(Configuration.BuildConfiguration, TargetFramework.Net8_0);
 

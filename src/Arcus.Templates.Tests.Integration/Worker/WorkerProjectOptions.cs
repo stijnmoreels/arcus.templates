@@ -1,4 +1,5 @@
 ﻿using System;
+using Arcus.Templates.Tests.Integration.Configuration;
 using Arcus.Templates.Tests.Integration.Fixture;
 using GuardNet;
 
@@ -20,8 +21,8 @@ namespace Arcus.Templates.Tests.Integration.Worker
         {
             Guard.NotNull(config, nameof(config), "Requires a configuration instance to retrieve the common test configuration values across worker project templates");
 
-            string instrumentationKey = config.GetApplicationInsightsInstrumentationKey();
-            var commandArgument = CommandArgument.CreateSecret(ApplicationInsightsConnectionStringKey, $"InstrumentationKey={instrumentationKey}");
+            AppInsightsConfig appInsights = config.GetAppInsights();
+            var commandArgument = CommandArgument.CreateSecret(ApplicationInsightsConnectionStringKey, appInsights.ConnectionString);
             AddRunArgument(commandArgument);
         }
 

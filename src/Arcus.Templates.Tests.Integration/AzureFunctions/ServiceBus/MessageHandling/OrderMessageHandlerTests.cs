@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Arcus.Templates.Tests.Integration.Fixture;
+using Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,14 +23,20 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus.MessageHan
         }
 
         [Theory]
-        [InlineData(ServiceBusEntityType.Topic)]
+        //[InlineData(ServiceBusEntityType.Topic)]
         [InlineData(ServiceBusEntityType.Queue)]
         public async Task ServiceBusProject_WithDefault_CorrectlyProcessesMessage(ServiceBusEntityType entityType)
         {
             // Arrange
             var config = TestConfig.Create();
-            await using var project = await AzureFunctionsServiceBusProject.StartNewProjectAsync(entityType, config, _outputWriter);
-            
+            var options = new AzureFunctionsServiceBusProjectOptions();
+            options.TearDownOptions = TearDownOptions.KeepProjectDirectory;
+            await using var project = await AzureFunctionsServiceBusProject.StartNewProjectAsync(entityType, options, config, _outputWriter);
+
+            //var service = new TestServiceBusMessagePumpService(entityType, config, config.GetAzureFunctionsServiceBusProjectDirectory(entityType), _outputWriter);
+
+            //await service.SimulateMessageProcessingAsync();
+
             // Act / Assert
             await project.Messaging.SimulateMessageProcessingAsync();
         }

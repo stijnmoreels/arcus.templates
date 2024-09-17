@@ -1,55 +1,54 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Arcus.Templates.Tests.Integration.Fixture;
-using Microsoft.Azure.ApplicationInsights.Query;
-using Microsoft.Azure.ApplicationInsights.Query.Models;
+using Arcus.Templates.Tests.Integration.WebApi.Fixture;
+using Arcus.Testing;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
+using TestConfig = Arcus.Templates.Tests.Integration.Fixture.TestConfig;
 
 namespace Arcus.Templates.Tests.Integration.WebApi.Logging.v1
 {
     [Collection(TestCollections.Integration)]
     [Trait("Category", TestTraits.Integration)]
-    public class RequestTrackingTests : ApplicationInsightsTests
+    public class RequestTrackingTests
     {
+        private readonly ITestOutputHelper _outputWriter;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestTrackingTests" /> class.
         /// </summary>
-        public RequestTrackingTests(ITestOutputHelper outputWriter) : base(outputWriter)
+        public RequestTrackingTests(ITestOutputHelper outputWriter)
         {
+            _outputWriter = outputWriter;
         }
 
         [Fact]
         public async Task GetSabotagedEndpoint_TracksFailedResponse_ReturnsFailedResponse()
         {
             // Arrange
-            var optionsWithSerilogLogging =
-                new WebApiProjectOptions().WithSerilogLogging(ApplicationInsightsConfig.InstrumentationKey);
+            var config = TestConfig.Create();
+            var options = new WebApiProjectOptions().WithSerilogLogging(config);
+
+            using var project = WebApiProject.CreateNew(config, options, _outputWriter);
             
-            using (var project = WebApiProject.CreateNew(Configuration, optionsWithSerilogLogging, Logger))
+            project.AddTypeAsFile<SaboteurController>();
+            await project.StartAsync();
+
+            // Act
+            using HttpResponseMessage response = await project.Root.GetAsync(SaboteurController.Route);
+                
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+            var client = new AppInsightsClient(config);
+            await Poll.UntilAvailableAsync<XunitException>(async () =>
             {
-                project.AddTypeAsFile<SaboteurController>();
-                await project.StartAsync();
-
-                project.TearDownOptions = TearDownOptions.KeepProjectDirectory;
-                // Act
-                using (HttpResponseMessage response = await project.Root.GetAsync(SaboteurController.Route))
-                {
-                    // Assert
-                    Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-                    await RetryAssertUntilTelemetryShouldBeAvailableAsync(async client =>
-                    {
-                        EventsResults<EventsRequestResult> results =
-                            await client.Events.GetRequestEventsAsync(ApplicationInsightsConfig.ApplicationId, timespan: PastHalfHourTimeSpan);
-
-                        Assert.Contains(results.Value, result =>
-                        {
-                            return result.Request.Url.Contains("sabotage") && result.Request.ResultCode == "500";
-                        });
-                    });
-                }
-            }
+                EventsRequestResult[] requests = await client.GetRequestsAsync();
+                Assert.Contains(requests, req => req.Request.Url.Contains("sabotage") && req.Request.ResultCode == "500");
+            }, opt => opt.Timeout = TimeSpan.FromMinutes(5));
         }
     }
 }

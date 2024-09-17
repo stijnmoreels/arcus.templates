@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using Arcus.Templates.Tests.Integration.AzureFunctions.Configuration;
 using Arcus.Templates.Tests.Integration.AzureFunctions.Http.Configuration;
-using Arcus.Templates.Tests.Integration.Worker.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using GuardNet;
@@ -109,14 +108,6 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         public DirectoryInfo GetAzureFunctionsEventHubsProjectDirectory()
         {
             return PathCombineWithSourcesDirectory("Arcus.Templates.AzureFunctions.EventHubs");
-        }
-
-        /// <summary>
-        /// Gets the project directory of the Azure Functions Databricks project template.
-        /// </summary>
-        public DirectoryInfo GetAzureFunctionsDatabricksJobMetricsProjectDirectory()
-        {
-            return PathCombineWithSourcesDirectory("Arcus.Templates.AzureFunctions.Databricks.JobMetrics");
         }
 
         /// <summary>
@@ -240,7 +231,7 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         }
 
         /// <summary>
-        /// Gets the Service Bus connection string based on the given <paramref name="entity"/>.
+        /// Gets the Service Bus connection string based on the given <paramref name="entityType"/>.
         /// </summary>
         public string GetServiceBusConnectionString(ServiceBusEntityType entityType)
         {
@@ -265,28 +256,6 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         }
 
         /// <summary>
-        /// Gets the instrumentation key to access the Azure Application Insights resource.
-        /// </summary>
-        public string GetApplicationInsightsInstrumentationKey()
-        {
-            const string key = "Arcus:Api:ApplicationInsights:InstrumentationKey";
-
-            return _configuration.GetValue<string>(key);
-        }
-
-        /// <summary>
-        /// Gets the configuration model to use an Azure Event Grid resource.
-        /// </summary>
-        /// <exception cref="KeyNotFoundException">Thrown when one or more configuration values cannot be found.</exception>
-        public EventGridConfig GetEventGridConfig()
-        {
-            var eventGridTopicUri = _configuration.GetRequiredValue<string>("Arcus:Worker:EventGrid:TopicUri");
-            var eventGridAuthKey = _configuration.GetRequiredValue<string>("Arcus:Worker:EventGrid:AuthKey");
-
-            return new EventGridConfig(eventGridTopicUri, eventGridAuthKey);
-        }
-
-        /// <summary>
         /// Gets the Azure Functions application configuration to create valid Azure Functions projects.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when one of the Azure Functions configuration values are not found.</exception>
@@ -306,20 +275,6 @@ namespace Arcus.Templates.Tests.Integration.Fixture
             return new AzureFunctionHttpConfig(
                 _configuration.GetRequiredValue<int>("Arcus:AzureFunctions:Http:Isolated:HttpPort"),
                 _configuration.GetRequiredValue<int>("Arcus:AzureFunctions:Http:InProcess:HttpPort"));
-        }
-
-        /// <summary>
-        /// Gets the Azure Application Insights configuration to interact with the Application Insights resource.
-        /// </summary>
-        /// <exception cref="KeyNotFoundException">Thrown when one of the Azure Application Insights configuration values are not found.</exception>
-        public ApplicationInsightsConfig GetApplicationInsightsConfig()
-        {
-            var instrumentationKey = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:ApplicationInsights:InstrumentationKey");
-            var applicationId = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:ApplicationInsights:ApplicationId");
-            var apiKey = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:ApplicationInsights:ApiKey");
-            var metricName = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:ApplicationInsights:MetricName");
-
-            return new ApplicationInsightsConfig(instrumentationKey, applicationId, apiKey, metricName);
         }
 
         /// <summary>

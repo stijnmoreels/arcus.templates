@@ -82,7 +82,9 @@ namespace Arcus.Templates.ServiceBus.Topic
                            services.AddAssemblyAppVersion<Program>();
                            
 #endif
-                           services.AddServiceBusTopicMessagePump("Receive-All", "ARCUS_SERVICEBUS_CONNECTIONSTRING")
+                           string? serviceBusNamespace = hostContext.Configuration["ARCUS_SERVICEBUS_NAMESPACE"];
+                           string? topicName = hostContext.Configuration["ARCUS_SERVICEBUS_TOPICNAME"];
+                           services.AddServiceBusTopicMessagePumpUsingManagedIdentityWithPrefix(topicName, subscriptionPrefix: "receive-", serviceBusNamespace)
                                    .WithServiceBusMessageHandler<EmptyMessageHandler, EmptyMessage>();
                            
                            services.AddTcpHealthProbes("ARCUS_HEALTH_PORT");

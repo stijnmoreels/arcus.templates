@@ -45,7 +45,6 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions
             RuntimeFileName = "Program.cs";
             RootEndpoint = configuration.GenerateRandomLocalhostUrl().ResetToRoot().ToUri();
             AzureFunctionsConfig = configuration.GetAzureFunctionsConfig();
-            ApplicationInsightsConfig = configuration.GetApplicationInsightsConfig();
         }
 
         /// <summary>
@@ -67,11 +66,6 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions
         /// Gets the Azure Functions information from the current application configuration, used by this project.
         /// </summary>
         protected AzureFunctionsConfig AzureFunctionsConfig { get; }
-
-        /// <summary>
-        /// Gets the Application Insights connectivity information from the current application configuration, used  by this project.
-        /// </summary>
-        protected  ApplicationInsightsConfig ApplicationInsightsConfig { get; }
 
         /// <summary>
         /// Adds an test Azure storage account connection string to the Azure Function project so the project can start up correctly.
@@ -104,8 +98,8 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions
             string targetFrameworkIdentifier = GetTargetFrameworkIdentifier(targetFramework);
             var processInfo = new ProcessStartInfo("func", $"start --no-build --prefix bin/{buildConfiguration}/{targetFrameworkIdentifier}")
             {
-                UseShellExecute = false,
-                CreateNoWindow = true,
+                UseShellExecute = true,
+                CreateNoWindow = false,
                 WorkingDirectory = ProjectDirectory.FullName,
             };
             Logger.WriteLine("> {0} {1}", processInfo.FileName, processInfo.Arguments);

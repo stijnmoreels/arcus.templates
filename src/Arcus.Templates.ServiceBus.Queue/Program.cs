@@ -82,7 +82,9 @@ namespace Arcus.Templates.ServiceBus.Queue
                            services.AddAssemblyAppVersion<Program>();
                            
 #endif
-                           services.AddServiceBusQueueMessagePump("ARCUS_SERVICEBUS_CONNECTIONSTRING")
+                           string? queueName = hostContext.Configuration["ARCUS_SERVICEBUS_QUEUENAME"];
+                           string? serviceBusNamespace = hostContext.Configuration["ARCUS_SERVICEBUS_NAMESPACE"];
+                           services.AddServiceBusQueueMessagePumpUsingManagedIdentity(queueName, serviceBusNamespace)
                                    .WithServiceBusMessageHandler<EmptyMessageHandler, EmptyMessage>();
                            
                            services.AddTcpHealthProbes("ARCUS_HEALTH_PORT");
