@@ -4,11 +4,11 @@ param location string
 // Define the name of the Azure Service bus namespace, used for the Messaging-related project templates.
 param serviceBusNamespace string
 
-// Define the name of the single queue in the Azure Service bus namespace.
-param serviceBus_queueName string
+// Define the name of the Azure EventHubs namespace, used for the Messaging-related project templates.
+param eventHubsNamespace string
 
-// Define the name of the single topic in the Azure Service bus namespace.
-param serviceBus_topicName string
+// Define the name of the Azure Storage account that will be created as a check-point storage for the Azure EventHubs resource.
+param storageAccountName string
 
 // Define the name of the single Applization Insights resource.
 param appInsightsName string
@@ -34,31 +34,25 @@ module serviceBus 'br/public:avm/res/service-bus/namespace:0.8.0' = {
       name: 'Standard'
     }
     publicNetworkAccess: 'Enabled'
-    
     roleAssignments: [
       {
         principalId: servicePrincipal_objectId
         roleDefinitionIdOrName: 'Azure Service Bus Data Owner'
       }
     ]
-    queues: [
+  }
+}
+
+module eventHubs 'br/public:avm/res/event-hub/namespace:0.7.0' = {
+  name: 'eventHubsDeployment'
+  params: {
+    name: eventHubsNamespace
+    location: location
+    skuName: 'Basic'
+    roleAssignments: [
       {
-        name: serviceBus_queueName
-      }
-    ]
-    topics: [
-      {
-        name: serviceBus_topicName
-        authorizationRules: [
-          {
-            name: 'RootManageSharedAccessKey'
-            rights: [
-              'Listen'
-              'Manage'
-              'Send'
-            ]
-          }
-        ]
+        principalId: servicePrincipal_objectId
+        roleDefinitionIdOrName: 'Azure Event Hubs Data Owner'
       }
     ]
   }
@@ -82,6 +76,28 @@ module component 'br/public:avm/res/insights/component:0.3.0' = {
       {
         principalId: servicePrincipal_objectId
         roleDefinitionIdOrName: '73c42c96-874c-492b-b04d-ab87d138a893' // Log Analytics Reader
+      }
+    ]
+  }
+}
+
+module storageAccount 'br/public:avm/res/storage/storage-account:0.9.1' = {
+  name: 'storageAccountDeployment'
+  params: {
+    name: storageAccountName
+    location: location
+    allowBlobPublicAccess: true
+    publicNetworkAccess: 'Enabled'
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Allow'
+      ipRules: []
+      virtualNetworkRules: []
+    }
+    roleAssignments: [
+      {
+        principalId: servicePrincipal_objectId
+        roleDefinitionIdOrName: 'Storage Blob Data Contributor'
       }
     ]
   }

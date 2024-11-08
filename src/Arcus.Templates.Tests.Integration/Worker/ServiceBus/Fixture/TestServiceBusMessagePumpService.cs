@@ -12,14 +12,13 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
-using TestConfig = Arcus.Templates.Tests.Integration.Fixture.TestConfig;
 
 namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
 {
     public class TestServiceBusMessagePumpService : IMessagingService
     {
-        private readonly ServiceBusEntityType _entityType;
-        private readonly TestConfig _configuration;
+        private readonly string _entityName;
+        private readonly TestTemplatesConfig _configuration;
         private readonly DirectoryInfo _projectDirectory;
         private readonly ILogger _logger;
 
@@ -28,11 +27,12 @@ namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
         /// </summary>
         public TestServiceBusMessagePumpService(
             ServiceBusEntityType entityType,
-            TestConfig configuration,
+            string entityName,
+            TestTemplatesConfig configuration,
             DirectoryInfo projectDirectory,
             ITestOutputHelper outputWriter)
         {
-            _entityType = entityType;
+            _entityName = entityName;
             _configuration = configuration;
             _projectDirectory = projectDirectory;
             _logger = new XunitTestLogger(outputWriter);
@@ -85,8 +85,7 @@ namespace Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture
             ServiceBusConfig serviceBusConfig = _configuration.GetServiceBus();
             await using var client = new ServiceBusClient(serviceBusConfig.FullyQualifiedNamespace, serviceBusConfig.ServicePrincipal.GetCredential());
             
-            string entityPath = serviceBusConfig.GetEntityPath(_entityType);
-            await using ServiceBusSender messageSender = client.CreateSender(entityPath);
+            await using ServiceBusSender messageSender = client.CreateSender(_entityName);
 
             try
             {

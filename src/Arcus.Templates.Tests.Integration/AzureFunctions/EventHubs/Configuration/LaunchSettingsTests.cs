@@ -22,7 +22,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs.Configurati
         public void EventHubsTrigger_WithDefault_ConfiguresLaunchSettings()
         {
             // Arrange
-            var config = TestConfig.Create();
+            var config = TestTemplatesConfig.Create();
             var options = new AzureFunctionsEventHubsProjectOptions();
 
             // Act

@@ -24,7 +24,7 @@ namespace Arcus.Templates.Tests.Integration.Worker.Health
         public async Task MinimumServiceBusQueueWorkerOnDocker_ProbeForHealthReport_ResponseHealthy()
         {
             // Arrange
-            var configuration = TestConfig.Create();
+            var configuration = TestTemplatesConfig.Create();
             int healthPort = configuration.GetDockerServiceBusQueueWorkerHealthPort();
 
             var healthEndpointService = new HealthEndpointService(healthPort, _outputWriter);
@@ -40,7 +40,7 @@ namespace Arcus.Templates.Tests.Integration.Worker.Health
         public async Task MinimumServiceBusTopicWorkerOnDocker_ProbeForHealthReport_ResponseHealthy()
         {
             // Arrange
-            var configuration = TestConfig.Create();
+            var configuration = TestTemplatesConfig.Create();
             int healthPort = configuration.GetDockerServiceBusTopicWorkerHealthPort();
 
             var healthEndpointService = new HealthEndpointService(healthPort, _outputWriter);
@@ -56,7 +56,7 @@ namespace Arcus.Templates.Tests.Integration.Worker.Health
         public async Task EventHubsWorkerOnDocker_ProbeForHealthReport_ResponseHealthy()
         {
             // Arrange
-            var configuration = TestConfig.Create();
+            var configuration = TestTemplatesConfig.Create();
             int healthPort = configuration.GetDockerEventHubsWorkerHealthPort();
 
             var healthEndpointService = new HealthEndpointService(healthPort, _outputWriter);

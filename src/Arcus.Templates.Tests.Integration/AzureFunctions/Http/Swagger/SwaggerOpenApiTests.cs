@@ -124,7 +124,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http.Swagger
             HttpStatusCode expectedStatusCode)
         {
             // Arrange
-            var testConfiguration = TestConfig.Create(buildConfiguration);
+            var testConfiguration = TestTemplatesConfig.Create(buildConfiguration);
             using (var project = await AzureFunctionsHttpProject.StartNewAsync(testConfiguration, _outputWriter))
             {
                 // Act

@@ -11,7 +11,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi.Health.v1
     [Trait("Category", TestTraits.Docker)]
     public class HealthDockerEndpointTests
     {
-        private readonly TestConfig _configuration;
+        private readonly TestTemplatesConfig _configuration;
         private readonly ITestOutputHelper _outputWriter;
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi.Health.v1
         /// </summary>
         public HealthDockerEndpointTests(ITestOutputHelper outputWriter)
         {
-            _configuration = TestConfig.Create();
+            _configuration = TestTemplatesConfig.Create();
             _outputWriter = outputWriter;
         }
 

@@ -30,7 +30,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="templateDirectory"/>, <paramref name="configuration"/>, or <paramref name="outputWriter"/> is <c>null</c>.</exception>
         protected  AzureFunctionsProject(
             DirectoryInfo templateDirectory, 
-            TestConfig configuration,
+            TestTemplatesConfig configuration,
             AzureFunctionsProjectOptions options,
             ITestOutputHelper outputWriter) 
             : base(templateDirectory, 
@@ -60,7 +60,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions
         /// <summary>
         /// Gets the entire test configuration of the integration test suite to retrieve Azure Function-specific test values.
         /// </summary>
-        protected TestConfig Configuration { get; }
+        protected TestTemplatesConfig Configuration { get; }
         
         /// <summary>
         /// Gets the Azure Functions information from the current application configuration, used by this project.
@@ -96,7 +96,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions
             RunDotNet($"build -c {buildConfiguration} {ProjectDirectory.FullName}");
 
             string targetFrameworkIdentifier = GetTargetFrameworkIdentifier(targetFramework);
-            var processInfo = new ProcessStartInfo("func", $"start --no-build --prefix bin/{buildConfiguration}/{targetFrameworkIdentifier}")
+            var processInfo = new ProcessStartInfo("C:\\Program Files\\Microsoft\\Azure Functions Core Tools\\func.exe", $"start --no-build --prefix bin/{buildConfiguration}/{targetFrameworkIdentifier}")
             {
                 UseShellExecute = true,
                 CreateNoWindow = false,

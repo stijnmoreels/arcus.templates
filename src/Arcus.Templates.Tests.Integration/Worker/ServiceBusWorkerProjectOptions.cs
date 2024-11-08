@@ -9,7 +9,7 @@ namespace Arcus.Templates.Tests.Integration.Worker
     /// </summary>
     public class ServiceBusWorkerProjectOptions : WorkerProjectOptions
     {
-        private ServiceBusWorkerProjectOptions(TestConfig config) : base(config)
+        private ServiceBusWorkerProjectOptions(TestTemplatesConfig config) : base(config)
         {
         }
 
@@ -18,7 +18,7 @@ namespace Arcus.Templates.Tests.Integration.Worker
         /// </summary>
         /// <param name="configuration">The integration test configuration instance to retrieve connection secrets.</param>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="configuration"/> is <c>null</c>.</exception>
-        public static ServiceBusWorkerProjectOptions Create(TestConfig configuration)
+        public static ServiceBusWorkerProjectOptions Create(TestTemplatesConfig configuration)
         {
             Guard.NotNull(configuration, nameof(configuration), "Requires a test configuration instance to retrieve additional connection secrets");
 

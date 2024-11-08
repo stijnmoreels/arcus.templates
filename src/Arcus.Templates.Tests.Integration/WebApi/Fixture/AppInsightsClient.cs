@@ -22,7 +22,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi.Fixture
         /// <summary>
         /// Initializes a new instance of the <see cref="AppInsightsClient" /> class.
         /// </summary>
-        public AppInsightsClient(TestConfig config)
+        public AppInsightsClient(TestTemplatesConfig config)
         {
             ServicePrincipalConfig servicePrincipal = config.GetServicePrincipal();
             _queryClient = new LogsQueryClient(servicePrincipal.GetCredential());

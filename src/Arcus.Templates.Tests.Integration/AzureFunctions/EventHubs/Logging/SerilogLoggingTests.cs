@@ -23,7 +23,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs.Logging
         public async Task EventHubsProject_WithoutSerilog_CorrectlyProcessesMessage()
         {
             // Arrange
-            var config = TestConfig.Create();
+            var config = TestTemplatesConfig.Create();
             var options = new AzureFunctionsEventHubsProjectOptions()
                 .ExcludeSerilog();
 

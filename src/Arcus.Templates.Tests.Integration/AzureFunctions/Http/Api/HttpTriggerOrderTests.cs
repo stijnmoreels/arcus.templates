@@ -17,7 +17,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http.Api
     [Trait("Category", TestTraits.Integration)]
     public class HttpTriggerOrderTests
     {
-        private readonly TestConfig _config;
+        private readonly TestTemplatesConfig _config;
         private readonly ITestOutputHelper _outputWriter;
 
         private static readonly Faker BogusGenerator = new Faker();
@@ -28,7 +28,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http.Api
         public HttpTriggerOrderTests(ITestOutputHelper outputWriter)
         {
             _outputWriter = outputWriter;
-            _config = TestConfig.Create();
+            _config = TestTemplatesConfig.Create();
         }
 
         [Fact]

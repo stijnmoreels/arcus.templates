@@ -41,7 +41,7 @@ namespace Arcus.Templates.AzureFunctions.ServiceBus.Topic
         /// <param name="executionContext">The execution context for this Azure Functions instance.</param>
         [Function("order-processing")]
         public async Task Run(
-            [ServiceBusTrigger("orders-topic", "order-subscription", Connection = "ServiceBusConnectionString")] byte[] messageBody,
+            [ServiceBusTrigger("orders-topic", "order-subscription", Connection = "ServiceBusConnection")] byte[] messageBody,
             FunctionContext executionContext)
         {
             ServiceBusReceivedMessage message = ConvertToServiceBusMessage(messageBody, executionContext);

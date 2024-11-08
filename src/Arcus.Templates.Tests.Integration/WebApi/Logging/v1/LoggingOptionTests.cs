@@ -11,7 +11,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi.Logging.v1
     [Trait("Category", TestTraits.Integration)]
     public class LoggingOptionTests
     {
-        private readonly TestConfig _configuration;
+        private readonly TestTemplatesConfig _configuration;
         private readonly ITestOutputHelper _outputWriter;
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi.Logging.v1
         public LoggingOptionTests(ITestOutputHelper outputWriter)
         {
             _outputWriter = outputWriter;
-            _configuration = TestConfig.Create();   
+            _configuration = TestTemplatesConfig.Create();   
         }
 
         [Fact]

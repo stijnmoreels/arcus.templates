@@ -12,7 +12,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi.Configuration
     [Trait("Category", TestTraits.Integration)]
     public class AppSettingsProjectCombinationTests
     {
-        private readonly TestConfig _configuration;
+        private readonly TestTemplatesConfig _configuration;
         private readonly ITestOutputHelper _outputWriter;
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi.Configuration
         public AppSettingsProjectCombinationTests(ITestOutputHelper outputWriter)
         {
             _outputWriter = outputWriter;
-            _configuration = TestConfig.Create();
+            _configuration = TestTemplatesConfig.Create();
         }
 
         [Fact]

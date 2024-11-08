@@ -1,4 +1,4 @@
-﻿using Arcus.Templates.Tests.Integration.Fixture;
+﻿using Arcus.Testing;
 using Azure.Core;
 using Azure.Identity;
 
@@ -32,5 +32,8 @@ namespace Arcus.Templates.Tests.Integration.Configuration
                 config["Arcus:ServicePrincipal:ClientId"],
                 config["Arcus:ServicePrincipal:ClientSecret"]);
         }
+
+        public static string GetSubscriptionId(this TestConfig config) => config["Arcus:SubscriptionId"];
+        public static string GetResourceGroupName(this TestConfig config) => config["Arcus:ResourceGroupName"];
     }
 }

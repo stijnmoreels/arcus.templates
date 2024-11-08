@@ -1,36 +1,24 @@
-﻿using Arcus.Templates.Tests.Integration.Fixture;
+﻿using Arcus.Testing;
+using Azure.Core;
+using Azure.ResourceManager.ServiceBus;
 using GuardNet;
-using Microsoft.Extensions.Logging;
 
 namespace Arcus.Templates.Tests.Integration.Configuration
 {
     public class ServiceBusConfig
     {
-        public ServiceBusConfig(ServicePrincipalConfig servicePrincipal, string ns, string queueName, string topicName)
+        public ServiceBusConfig(ServicePrincipalConfig servicePrincipal, string subscriptionId, string resourceGroupName, string ns)
         {
             Guard.NotNullOrWhitespace(ns, nameof(ns));
-            Guard.NotNullOrWhitespace(queueName, nameof(queueName));
-            Guard.NotNullOrWhitespace(topicName, nameof(topicName));
 
             ServicePrincipal = servicePrincipal;
             FullyQualifiedNamespace = ns + ".servicebus.windows.net";
-            QueueName = queueName;
-            TopicName = topicName;
+            ResourceId = ServiceBusNamespaceResource.CreateResourceIdentifier(subscriptionId, resourceGroupName, ns);
         }
 
         public ServicePrincipalConfig ServicePrincipal { get; }
         public string FullyQualifiedNamespace { get; }
-        public string QueueName { get; }
-        public string TopicName { get; }
-
-        public string GetEntityPath(ServiceBusEntityType type)
-        {
-            return type switch
-            {
-                ServiceBusEntityType.Queue => QueueName,
-                ServiceBusEntityType.Topic => TopicName,
-            };
-        }
+        public ResourceIdentifier ResourceId { get; }
     }
 
     public static class ServiceBusTestConfigExtensions
@@ -39,9 +27,9 @@ namespace Arcus.Templates.Tests.Integration.Configuration
         {
             return new ServiceBusConfig(
                 config.GetServicePrincipal(),
-                config["Arcus:ServiceBus:Namespace"],
-                config["Arcus:ServiceBus:QueueName"],
-                config["Arcus:ServiceBus:TopicName"]);
+                config.GetSubscriptionId(),
+                config.GetResourceGroupName(),
+                config["Arcus:ServiceBus:Namespace"]);
         }
     }
 }

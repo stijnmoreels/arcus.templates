@@ -28,7 +28,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http
         public const string OrderFunctionName = "order";
 
         private AzureFunctionsHttpProject(
-            TestConfig configuration, 
+            TestTemplatesConfig configuration, 
             AzureFunctionsHttpProjectOptions options,
             ITestOutputHelper outputWriter) 
             : base(configuration.GetAzureFunctionsHttpProjectDirectory(), 
@@ -101,7 +101,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http
             Guard.NotNull(options, nameof(options), "Requires a set of project argument options to create the Azure Functions HTTP trigger project");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Requires a test logger to write diagnostic information during the creation and startup process");
 
-            AzureFunctionsHttpProject project = await StartNewAsync(TestConfig.Create(), options, outputWriter);
+            AzureFunctionsHttpProject project = await StartNewAsync(TestTemplatesConfig.Create(), options, outputWriter);
             return project;
         }
         
@@ -115,7 +115,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http
         /// </returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="configuration"/> or <paramref name="outputWriter"/> is <c>null</c>.</exception>
         /// <exception cref="CannotStartTemplateProjectException">Thrown when the Azure Functions project cannot be started correctly.</exception>
-        public static async Task<AzureFunctionsHttpProject> StartNewAsync(TestConfig configuration, ITestOutputHelper outputWriter)
+        public static async Task<AzureFunctionsHttpProject> StartNewAsync(TestTemplatesConfig configuration, ITestOutputHelper outputWriter)
         {
             Guard.NotNull(configuration, nameof(configuration), "Requires a configuration instance to control the hosting of the to-be-created project");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Requires a test logger to write diagnostic information during the creation and startup process");
@@ -138,7 +138,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http
         /// </exception>
         /// <exception cref="CannotStartTemplateProjectException">Thrown when the Azure Functions project cannot be started correctly.</exception>
         public static async Task<AzureFunctionsHttpProject> StartNewAsync(
-            TestConfig configuration,
+            TestTemplatesConfig configuration,
             AzureFunctionsHttpProjectOptions options,
             ITestOutputHelper outputWriter)
         {
@@ -161,7 +161,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http
         ///     An Azure Functions HTTP trigger project with a full set of endpoint services to interact with.
         /// </returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="configuration"/> or <paramref name="outputWriter"/> is <c>null</c>.</exception>
-        public static AzureFunctionsHttpProject CreateNew(TestConfig configuration, ITestOutputHelper outputWriter)
+        public static AzureFunctionsHttpProject CreateNew(TestTemplatesConfig configuration, ITestOutputHelper outputWriter)
         {
             Guard.NotNull(configuration, nameof(configuration), "Requires a configuration instance to control the hosting of the to-be-created project");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Requires a test logger to write diagnostic information during the creation and startup process");
@@ -182,7 +182,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http
         /// <exception cref="ArgumentNullException">
         ///     Thrown when the <paramref name="configuration"/>, <paramref name="options"/> or <paramref name="outputWriter"/> is <c>null</c>.
         /// </exception>
-        public static AzureFunctionsHttpProject CreateNew(TestConfig configuration, AzureFunctionsHttpProjectOptions options, ITestOutputHelper outputWriter)
+        public static AzureFunctionsHttpProject CreateNew(TestTemplatesConfig configuration, AzureFunctionsHttpProjectOptions options, ITestOutputHelper outputWriter)
         {
             Guard.NotNull(configuration, nameof(configuration), "Requires a configuration instance to control the hosting of the to-be-created project");
             Guard.NotNull(options, nameof(options), "Requires a set of project argument options to create the Azure Functions HTTP trigger project");

@@ -16,7 +16,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http.Health
     [Trait("Category", TestTraits.Integration)]
     public class HealthChecksTests
     {
-        private readonly TestConfig _config;
+        private readonly TestTemplatesConfig _config;
         private readonly ITestOutputHelper _outputWriter;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http.Health
         public HealthChecksTests(ITestOutputHelper outputWriter)
         {
             _outputWriter = outputWriter;
-            _config = TestConfig.Create();
+            _config = TestTemplatesConfig.Create();
         }
 
         [Fact]

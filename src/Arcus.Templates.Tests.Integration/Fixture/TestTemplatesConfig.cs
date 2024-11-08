@@ -8,25 +8,22 @@ using Microsoft.Extensions.Primitives;
 using GuardNet;
 using Microsoft.Extensions.Logging;
 using Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture;
+using Arcus.Testing;
 
 namespace Arcus.Templates.Tests.Integration.Fixture
 {
     /// <summary>
     /// Configuration implementation with test values used in test cases to simulate scenario's.
     /// </summary>
-    public class TestConfig : IConfigurationRoot
+    public class TestTemplatesConfig : Arcus.Testing.TestConfig
     {
         private readonly IConfigurationRoot _configuration;
 
-        private TestConfig(
-            IConfigurationRoot configuration, 
+        private TestTemplatesConfig(
             BuildConfiguration buildConfiguration,
             TargetFramework targetFramework)
+            : base(options => options.AddOptionalJsonFile("appsettings.private.json"))
         {
-            Guard.NotNull(configuration, nameof(configuration));
-
-            _configuration = configuration;
-
             BuildConfiguration = buildConfiguration;
             TargetFramework = targetFramework;
         }
@@ -46,57 +43,53 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// </summary>
         /// <param name="buildConfiguration">The configuration in which the created project from the template should be build.</param>
         /// <param name="targetFramework">The target framework in which the created project from the template should be build and run.</param>
-        public static TestConfig Create(
+        public static TestTemplatesConfig Create(
             BuildConfiguration buildConfiguration = BuildConfiguration.Debug,
             TargetFramework targetFramework = TargetFramework.Net8_0)
         {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile(path: "appsettings.json", optional: true)
-                .AddJsonFile(path: "appsettings.local.json", optional: true)
-                .AddJsonFile(path: "appsettings.private.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            return new TestConfig(configuration, buildConfiguration, targetFramework);
+           return new TestTemplatesConfig(buildConfiguration, targetFramework);
         }
+    }
 
-        /// <summary>
+    public static class TestConfigExtensions
+    {
+         /// <summary>
         /// Gets the project directory of the web API project.
         /// </summary>
-        public DirectoryInfo GetWebApiProjectDirectory()
+        public static DirectoryInfo GetWebApiProjectDirectory(this TestConfig configuration)
         {
-            return PathCombineWithSourcesDirectory("Arcus.Templates.WebApi");
+            return PathCombineWithSourcesDirectory(configuration, "Arcus.Templates.WebApi");
         }
 
         /// <summary>
         /// Gets the project directory of the Service Bus project based on the given <paramref name="entityType"/>.
         /// </summary>
-        public DirectoryInfo GetServiceBusProjectDirectory(ServiceBusEntityType entityType)
+        public static DirectoryInfo GetServiceBusProjectDirectory(this TestConfig configuration, ServiceBusEntityType entityType)
         {
             switch (entityType)
             {
-                case ServiceBusEntityType.Queue: return PathCombineWithSourcesDirectory("Arcus.Templates.ServiceBus.Queue");
-                case ServiceBusEntityType.Topic: return PathCombineWithSourcesDirectory("Arcus.Templates.ServiceBus.Topic");
+                case ServiceBusEntityType.Queue: return PathCombineWithSourcesDirectory(configuration, "Arcus.Templates.ServiceBus.Queue");
+                case ServiceBusEntityType.Topic: return PathCombineWithSourcesDirectory(configuration, "Arcus.Templates.ServiceBus.Topic");
                 default:
                     throw new ArgumentOutOfRangeException(nameof(entityType), entityType, "Unknown Service Bus entity");
             }
         }
 
-        public DirectoryInfo GetEventHubsProjectDirectory()
+        public static DirectoryInfo GetEventHubsProjectDirectory(this TestConfig configuration)
         {
-            return PathCombineWithSourcesDirectory("Arcus.Templates.EventHubs");
+            return PathCombineWithSourcesDirectory(configuration, "Arcus.Templates.EventHubs");
         }
 
         /// <summary>
         /// Gets the project directory of the Azure Functions Service Bus project based on the given <paramref name="entityType"/>.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when no project directory can be found for the given <paramref name="entityType"/>.</exception>
-        public DirectoryInfo GetAzureFunctionsServiceBusProjectDirectory(ServiceBusEntityType entityType)
+        public static DirectoryInfo GetAzureFunctionsServiceBusProjectDirectory(this TestConfig configuration, ServiceBusEntityType entityType)
         {
             switch (entityType)
             {
-                case ServiceBusEntityType.Queue: return PathCombineWithSourcesDirectory("Arcus.Templates.AzureFunctions.ServiceBus.Queue");
-                case ServiceBusEntityType.Topic: return PathCombineWithSourcesDirectory("Arcus.Templates.AzureFunctions.ServiceBus.Topic");
+                case ServiceBusEntityType.Queue: return PathCombineWithSourcesDirectory(configuration, "Arcus.Templates.AzureFunctions.ServiceBus.Queue");
+                case ServiceBusEntityType.Topic: return PathCombineWithSourcesDirectory(configuration, "Arcus.Templates.AzureFunctions.ServiceBus.Topic");
                 default:
                     throw new ArgumentOutOfRangeException(nameof(entityType), entityType, "Unknown Service Bus entity type");
             }
@@ -105,30 +98,30 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// <summary>
         /// Gets the project directory of the Azure Functions EventHubs project template.
         /// </summary>
-        public DirectoryInfo GetAzureFunctionsEventHubsProjectDirectory()
+        public static DirectoryInfo GetAzureFunctionsEventHubsProjectDirectory(this TestConfig configuration)
         {
-            return PathCombineWithSourcesDirectory("Arcus.Templates.AzureFunctions.EventHubs");
+            return PathCombineWithSourcesDirectory(configuration, "Arcus.Templates.AzureFunctions.EventHubs");
         }
 
         /// <summary>
         /// Gets the project directory of the Azure Functions Databricks project template.
         /// </summary>
-        public DirectoryInfo GetAzureFunctionsHttpProjectDirectory()
+        public static DirectoryInfo GetAzureFunctionsHttpProjectDirectory(this TestConfig configuration)
         {
-            return PathCombineWithSourcesDirectory("Arcus.Templates.AzureFunctions.Http");
+            return PathCombineWithSourcesDirectory(configuration, "Arcus.Templates.AzureFunctions.Http");
         }
 
         /// <summary>
         /// Gets the project directory where the fixtures are located.
         /// </summary>
-        public DirectoryInfo GetFixtureProjectDirectory()
+        public static DirectoryInfo GetFixtureProjectDirectory(this TestConfig configuration)
         {
-            return PathCombineWithSourcesDirectory(typeof(TestConfig).Assembly.GetName().Name);
+            return PathCombineWithSourcesDirectory(configuration, typeof(TestTemplatesConfig).Assembly.GetName().Name);
         }
 
-        private DirectoryInfo PathCombineWithSourcesDirectory(string subPath)
+        private static DirectoryInfo PathCombineWithSourcesDirectory(TestConfig configuration, string subPath)
         {
-            DirectoryInfo sourcesDirectory = GetBuildSourcesDirectory();
+            DirectoryInfo sourcesDirectory = GetBuildSourcesDirectory(configuration);
 
             string path = Path.Combine(sourcesDirectory.FullName, "src", subPath);
             if (!Directory.Exists(path))
@@ -140,11 +133,11 @@ namespace Arcus.Templates.Tests.Integration.Fixture
             return new DirectoryInfo(path);
         }
 
-        private DirectoryInfo GetBuildSourcesDirectory()
+        private static DirectoryInfo GetBuildSourcesDirectory(TestConfig configuration)
         {
             const string buildSourcesDirectory = "Build.SourcesDirectory";
 
-            string sourcesDirectory = _configuration.GetValue<string>(buildSourcesDirectory);
+            string sourcesDirectory = configuration.GetValue<string>(buildSourcesDirectory);
             Guard.NotNull(sourcesDirectory, nameof(sourcesDirectory), $"No build sources directory configured with the key: {buildSourcesDirectory}");
             Guard.For<ArgumentException>(
                 () => !Directory.Exists(sourcesDirectory),
@@ -157,9 +150,9 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// Gets the base URL of the to-be-created project from the web API template.
         /// </summary>
         /// <returns></returns>
-        public Uri GetDockerBaseUrl()
+        public static Uri GetDockerBaseUrl(this TestConfig configuration)
         {
-            Uri baseUrl = GetBaseUrl();
+            Uri baseUrl = GetBaseUrl(configuration);
             return baseUrl;
         }
 
@@ -168,19 +161,19 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// <summary>
         /// Gets the base URL of the to-be-created project from the web API template.
         /// </summary>
-        public Uri GenerateRandomLocalhostUrl()
+        public static Uri GenerateRandomLocalhostUrl(this TestConfig configuration)
         {
-            Uri baseUrl = GetBaseUrl();
+            Uri baseUrl = GetBaseUrl(configuration);
 
             int port = RandomPort.Next(8080, 9000);
             return new Uri($"http://localhost:{port}{baseUrl.AbsolutePath}");
         }
         
-        private Uri GetBaseUrl()
+        private static Uri GetBaseUrl(TestConfig configuration)
         {
             const string baseUrlKey = "Arcus:Api:BaseUrl";
 
-            var baseUrl = _configuration.GetValue<string>(baseUrlKey);
+            var baseUrl = configuration.GetValue<string>(baseUrlKey);
             Guard.NotNull(baseUrl, nameof(baseUrl), $"No base URL configured with the key: {baseUrlKey}");
 
             if (!Uri.TryCreate(baseUrl, UriKind.RelativeOrAbsolute, out Uri result))
@@ -195,7 +188,7 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// <summary>
         /// Generates a new TCP port for self-containing worker projects.
         /// </summary>
-        public int GenerateWorkerHealthPort()
+        public static int GenerateWorkerHealthPort(this TestConfig configuration)
         {
             return RandomPort.Next(8080, 9000);
         }
@@ -203,65 +196,40 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// <summary>
         /// Gets the TCP port on which the Service Bus Queue worker projects on docker run on.
         /// </summary>
-        public int GetDockerServiceBusQueueWorkerHealthPort()
+        public static int GetDockerServiceBusQueueWorkerHealthPort(this TestConfig configuration)
         {
             const string tcpPortKey = "Arcus:Worker:ServiceBus:Queue:HealthPort";
 
-            return _configuration.GetValue<int>(tcpPortKey);
+            return configuration.GetValue<int>(tcpPortKey);
         }
 
         /// <summary>
         /// Gets the TCP port on which the Service Bus topic worker projects on docker run on.
         /// </summary>
-        public int GetDockerServiceBusTopicWorkerHealthPort()
+        public static int GetDockerServiceBusTopicWorkerHealthPort(this TestConfig configuration)
         {
             const string tcpPortKey = "Arcus:Worker:ServiceBus:Topic:HealthPort";
 
-            return _configuration.GetValue<int>(tcpPortKey);
+            return configuration.GetValue<int>(tcpPortKey);
         }
 
         /// <summary>
         /// Gets the TCP port on which the Service Bus topic worker projects on docker run on.
         /// </summary>
-        public int GetDockerEventHubsWorkerHealthPort()
+        public static int GetDockerEventHubsWorkerHealthPort(this TestConfig configuration)
         {
             const string tcpPortKey = "Arcus:Worker:EventHubs:HealthPort";
 
-            return _configuration.GetValue<int>(tcpPortKey);
-        }
-
-        /// <summary>
-        /// Gets the Service Bus connection string based on the given <paramref name="entityType"/>.
-        /// </summary>
-        public string GetServiceBusConnectionString(ServiceBusEntityType entityType)
-        {
-            switch (entityType)
-            {
-                case ServiceBusEntityType.Queue: return _configuration["Arcus:Worker:ServiceBus:Queue:ConnectionString"];
-                case ServiceBusEntityType.Topic: return _configuration["Arcus:Worker:ServiceBus:Topic:ConnectionString"];
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(entityType), entityType, "Unknown Service Bus entity");
-            }
-        }
-
-        /// <summary>
-        /// Gets all the configuration to run the Azure EventHubs integration tests.
-        /// </summary>
-        public EventHubsConfig GetEventHubsConfig()
-        {
-            return new EventHubsConfig(
-                _configuration.GetValue<string>("Arcus:Worker:EventHubs:EventHubsName"),
-                _configuration.GetValue<string>("Arcus:Worker:EventHubs:ConnectionString"),
-                _configuration.GetValue<string>("Arcus:Worker:EventHubs:BlobStorage:StorageAccountConnectionString"));
+            return configuration.GetValue<int>(tcpPortKey);
         }
 
         /// <summary>
         /// Gets the Azure Functions application configuration to create valid Azure Functions projects.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when one of the Azure Functions configuration values are not found.</exception>
-        public AzureFunctionsConfig GetAzureFunctionsConfig()
+        public static AzureFunctionsConfig GetAzureFunctionsConfig(this TestConfig configuration)
         {
-            var storageAccountConnectionString = _configuration.GetRequiredValue<string>("Arcus:AzureFunctions:AzureWebJobsStorage");
+            var storageAccountConnectionString = configuration.GetRequiredValue<string>("Arcus:AzureFunctions:AzureWebJobsStorage");
 
             return new AzureFunctionsConfig(storageAccountConnectionString);
         }
@@ -270,65 +238,11 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// Gets the application configuration to interact with the HTTP Azure Function.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when one of the HTTP Azure Function configuration values are not found.</exception>
-        public AzureFunctionHttpConfig GetAzureFunctionHttpConfig()
+        public static AzureFunctionHttpConfig GetAzureFunctionHttpConfig(this TestConfig configuration)
         {
             return new AzureFunctionHttpConfig(
-                _configuration.GetRequiredValue<int>("Arcus:AzureFunctions:Http:Isolated:HttpPort"),
-                _configuration.GetRequiredValue<int>("Arcus:AzureFunctions:Http:InProcess:HttpPort"));
-        }
-
-        /// <summary>
-        /// Gets or sets a configuration value.
-        /// </summary>
-        /// <param name="key">The configuration key.</param>
-        /// <returns>The configuration value.</returns>
-        public string this[string key] 
-        { 
-            get => _configuration[key]; 
-            set => _configuration[key] = value; 
-        }
-
-        /// <summary>
-        /// The<see cref="IConfigurationProvider" /> for this configuration.
-        /// </summary>
-        public IEnumerable<IConfigurationProvider> Providers => _configuration.Providers;
-
-        /// <summary>
-        /// Gets the immediate descendant configuration sub-sections.
-        /// </summary>
-        /// <returns>The configuration sub-sections.</returns>
-        public IEnumerable<IConfigurationSection> GetChildren()
-        {
-            return _configuration.GetChildren();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="IChangeToken"/> that can be used to observe when this configuration is reloaded.
-        /// </summary>
-        public IChangeToken GetReloadToken()
-        {
-            return _configuration.GetReloadToken();
-        }
-
-        /// <summary>
-        /// Gets a configuration sub-section with the specified key.
-        /// </summary>
-        /// <param name="key">The key of the configuration section.</param>
-        /// <remarks>
-        ///     This method will never return null. If no matching sub-section is found with
-        ///      the specified key, an empty <see cref="IConfigurationSection" /> will be returned.
-        /// </remarks>
-        public IConfigurationSection GetSection(string key)
-        {
-            return _configuration.GetSection(key);
-        }
-
-        /// <summary>
-        /// Force the configuration values to be reloaded from the underlying <see cref="IConfigurationProvider" />
-        /// </summary>
-        public void Reload()
-        {
-            _configuration.Reload();
+                configuration.GetRequiredValue<int>("Arcus:AzureFunctions:Http:Isolated:HttpPort"),
+                configuration.GetRequiredValue<int>("Arcus:AzureFunctions:Http:InProcess:HttpPort"));
         }
     }
 }

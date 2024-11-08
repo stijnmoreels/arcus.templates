@@ -17,11 +17,11 @@ namespace Arcus.Templates.Tests.Integration.Worker
     public class WorkerProject : TemplateProject, IAsyncDisposable
     {
         private readonly int _healthPort;
-        private readonly TestConfig _configuration;
+        private readonly TestTemplatesConfig _configuration;
 
         protected WorkerProject(
             DirectoryInfo templateDirectory,
-            TestConfig configuration,
+            TestTemplatesConfig configuration,
             ITestOutputHelper outputWriter)
             : base(templateDirectory, configuration.GetFixtureProjectDirectory(), outputWriter)
         {
@@ -33,7 +33,7 @@ namespace Arcus.Templates.Tests.Integration.Worker
 
         protected WorkerProject(
             DirectoryInfo templateDirectory,
-            TestConfig configuration,
+            TestTemplatesConfig configuration,
             IMessagingService messaging,
             ITestOutputHelper outputWriter)
             : this(templateDirectory, configuration, outputWriter)

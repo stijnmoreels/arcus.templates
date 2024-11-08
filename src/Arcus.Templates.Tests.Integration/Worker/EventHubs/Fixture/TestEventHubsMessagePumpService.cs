@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Arcus.Templates.Tests.Integration.Configuration;
 using Arcus.Templates.Tests.Integration.Fixture;
 using Arcus.Templates.Tests.Integration.Logging;
 using Arcus.Templates.Tests.Integration.Worker.Fixture;
@@ -13,13 +14,13 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
-using TestConfig = Arcus.Templates.Tests.Integration.Fixture.TestConfig;
 
 namespace Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture
 {
     public class TestEventHubsMessagePumpService : IMessagingService
     {
-        private readonly TestConfig _configuration;
+        private readonly string _hubName;
+        private readonly TestTemplatesConfig _configuration;
         private readonly DirectoryInfo _projectDirectory;
         private readonly ILogger _logger;
 
@@ -27,10 +28,12 @@ namespace Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture
         /// Initializes a new instance of the <see cref="TestEventHubsMessagePumpService" /> class.
         /// </summary>
         public TestEventHubsMessagePumpService(
-            TestConfig configuration,
+            string hubName,
+            TestTemplatesConfig configuration,
             DirectoryInfo projectDirectory,
             ITestOutputHelper outputWriter)
         {
+            _hubName = hubName;
             _configuration = configuration;
             _projectDirectory = projectDirectory;
             _logger = new XunitTestLogger(outputWriter);
@@ -76,8 +79,8 @@ namespace Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture
                 Properties = { ["Diagnostic-Id"] = traceParent.DiagnosticId }
             };
 
-            EventHubsConfig eventHubsConfig = _configuration.GetEventHubsConfig();
-            await using var client = new EventHubProducerClient(eventHubsConfig.EventHubsConnectionString, eventHubsConfig.EventHubsName);
+            EventHubsConfig eventHubsConfig = _configuration.GetEventHubs();
+            await using var client = new EventHubProducerClient(eventHubsConfig.FullyQualifiedNamespace, _hubName, _configuration.GetServicePrincipal().GetCredential());
             await client.SendAsync(new[] { message });
         }
 

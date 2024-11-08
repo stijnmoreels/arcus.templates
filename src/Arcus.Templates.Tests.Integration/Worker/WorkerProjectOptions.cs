@@ -17,7 +17,7 @@ namespace Arcus.Templates.Tests.Integration.Worker
         /// </summary>
         /// <param name="config">The test configuration instance containing the common values across worker project templates.</param>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="config"/> is <c>null</c>.</exception>
-        protected WorkerProjectOptions(TestConfig config)
+        protected WorkerProjectOptions(TestTemplatesConfig config)
         {
             Guard.NotNull(config, nameof(config), "Requires a configuration instance to retrieve the common test configuration values across worker project templates");
 

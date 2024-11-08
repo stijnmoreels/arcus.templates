@@ -23,13 +23,13 @@ namespace Arcus.Templates.Tests.Integration.WebApi
     public class WebApiProject : TemplateProject
     {
         private readonly Uri _baseUrl;
-        private readonly TestConfig _configuration;
+        private readonly TestTemplatesConfig _configuration;
 
         private static readonly HttpClient HttpClient = new HttpClient();
 
         private WebApiProject(
             Uri baseUrl,
-            TestConfig configuration,
+            TestTemplatesConfig configuration,
             DirectoryInfo templateDirectory,
             DirectoryInfo fixturesDirectory,
             ITestOutputHelper outputWriter)
@@ -58,7 +58,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         {
             Guard.NotNull(outputWriter, nameof(outputWriter), "Cannot create web API services without a test output logger");
 
-            return await StartNewAsync(TestConfig.Create(), outputWriter);
+            return await StartNewAsync(TestTemplatesConfig.Create(), outputWriter);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         /// <returns>
         ///     A web API project with a full set of endpoint services to interact with the API.
         /// </returns>
-        public static async Task<WebApiProject> StartNewAsync(TestConfig configuration, ITestOutputHelper outputWriter)
+        public static async Task<WebApiProject> StartNewAsync(TestTemplatesConfig configuration, ITestOutputHelper outputWriter)
         {
             Guard.NotNull(configuration, nameof(configuration), "Cannot create a web API project from the template without a test configuration");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Cannot create web API services without a test output logger");
@@ -90,7 +90,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
             Guard.NotNull(projectOptions, nameof(projectOptions), "Cannot create a web API project without a set of project argument options");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Cannot create web API services without a test output logger");
 
-            return await StartNewAsync(TestConfig.Create(), projectOptions, outputWriter);
+            return await StartNewAsync(TestTemplatesConfig.Create(), projectOptions, outputWriter);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         /// <returns>
         ///     A web API project with a full set of endpoint services to interact with the API.
         /// </returns>
-        public static async Task<WebApiProject> StartNewAsync(TestConfig configuration, WebApiProjectOptions projectOptions, ITestOutputHelper outputWriter)
+        public static async Task<WebApiProject> StartNewAsync(TestTemplatesConfig configuration, WebApiProjectOptions projectOptions, ITestOutputHelper outputWriter)
         {
             Guard.NotNull(configuration, nameof(configuration), "Cannot create a web API project from the template without a test configuration");
             Guard.NotNull(projectOptions, nameof(projectOptions), "Cannot create a web API project without a set of project argument options");
@@ -128,7 +128,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         {
             Guard.NotNull(outputWriter, nameof(outputWriter), "Cannot create web API services without a test output logger");
 
-            return CreateNew(TestConfig.Create(), WebApiProjectOptions.Empty, outputWriter);
+            return CreateNew(TestTemplatesConfig.Create(), WebApiProjectOptions.Empty, outputWriter);
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         /// <remarks>
         ///     Before the project can be interacted with, the project must be started by calling the <see cref="StartAsync" /> method.
         /// </remarks>
-        public static WebApiProject CreateNew(TestConfig configuration, ITestOutputHelper outputWriter)
+        public static WebApiProject CreateNew(TestTemplatesConfig configuration, ITestOutputHelper outputWriter)
         {
             Guard.NotNull(configuration, nameof(configuration), "Cannot create a web API project from the template without a test configuration");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Cannot create web API services without a test output logger");
@@ -166,7 +166,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
             Guard.NotNull(projectOptions, nameof(projectOptions), "Cannot create a web API project without a set of project argument options");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Cannot create web API services without a test output logger");
 
-            return CreateNew(TestConfig.Create(), projectOptions, outputWriter);
+            return CreateNew(TestTemplatesConfig.Create(), projectOptions, outputWriter);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         /// <remarks>
         ///     Before the project can be interacted with, the project must be started by calling the <see cref="StartAsync" /> method.
         /// </remarks>
-        public static WebApiProject CreateNew(TestConfig configuration, WebApiProjectOptions projectOptions, ITestOutputHelper outputWriter)
+        public static WebApiProject CreateNew(TestTemplatesConfig configuration, WebApiProjectOptions projectOptions, ITestOutputHelper outputWriter)
         {
             Guard.NotNull(configuration, nameof(configuration), "Cannot create a web API project from the template without a test configuration");
             Guard.NotNull(projectOptions, nameof(projectOptions), "Cannot create a web API project without a set of project argument options");

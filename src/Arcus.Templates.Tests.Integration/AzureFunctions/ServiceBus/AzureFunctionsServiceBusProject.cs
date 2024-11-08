@@ -24,9 +24,12 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
     [DebuggerDisplay("Project = {ProjectDirectory.FullName}")]
     public class AzureFunctionsServiceBusProject : AzureFunctionsProject, IAsyncDisposable
     {
+        private readonly string _entityName;
+
         private AzureFunctionsServiceBusProject(
             ServiceBusEntityType entityType, 
-            TestConfig configuration, 
+            string entityName,
+            TestTemplatesConfig configuration, 
             AzureFunctionsServiceBusProjectOptions options,
             ITestOutputHelper outputWriter) 
             : base(configuration.GetAzureFunctionsServiceBusProjectDirectory(entityType), 
@@ -34,7 +37,8 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
                    options,
                    outputWriter)
         {
-            Messaging = new TestServiceBusMessagePumpService(entityType, configuration, ProjectDirectory, outputWriter);
+            _entityName = entityName;
+            Messaging = new TestServiceBusMessagePumpService(entityType, entityName, configuration, ProjectDirectory, outputWriter);
             Admin = new AdminEndpointService(RootEndpoint.Port, "order-processing", outputWriter);
         }
 
@@ -54,9 +58,21 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
         /// <summary>
         /// Starts a newly created project from the Azure Functions Service Bus project template.
         /// </summary>
-        /// <param name="entityType">The type of the Azure Service Bus entity, to control the used project template.</param>
-        /// <param name="configuration">The collection of configuration values to correctly initialize the resulting project with secret values.</param>
-        /// <param name="outputWriter">The output logger to add telemetry information during the creation and startup process.</param>
+        /// <returns>
+        ///     An Azure Functions Service Bus project with a set of services to interact with the worker.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="outputWriter"/> is <c>null</c>.</exception>
+        public static async Task<AzureFunctionsServiceBusProject> StartNewProjectAsync(
+            ServiceBusEntityType entityType,
+            string entityName,
+            ITestOutputHelper outputWriter)
+        {
+            return await StartNewProjectAsync(entityType, entityName, new AzureFunctionsServiceBusProjectOptions(), TestTemplatesConfig.Create(), outputWriter);
+        }
+
+        /// <summary>
+        /// Starts a newly created project from the Azure Functions Service Bus project template.
+        /// </summary>
         /// <returns>
         ///     An Azure Functions Service Bus project with a set of services to interact with the worker.
         /// </returns>
@@ -65,22 +81,19 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
         /// </exception>
         public static async Task<AzureFunctionsServiceBusProject> StartNewProjectAsync(
             ServiceBusEntityType entityType,
-            TestConfig configuration,
+            string entityName,
+            TestTemplatesConfig configuration,
             ITestOutputHelper outputWriter)
         {
             Guard.NotNull(configuration, nameof(configuration), "Requires a configuration instance to retrieve the configuration values to pass along to the to-be-created project");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Requires a test logger to write diagnostic information during the creation and startup process");
 
-            return await StartNewProjectAsync(entityType, new AzureFunctionsServiceBusProjectOptions(), configuration, outputWriter);
+            return await StartNewProjectAsync(entityType, entityName, new AzureFunctionsServiceBusProjectOptions(), configuration, outputWriter);
         }
 
         /// <summary>
         /// Starts a newly created project from the Azure Functions Service Bus project template.
         /// </summary>
-        /// <param name="entityType">The type of the Azure Service Bus entity, to control the used project template.</param>
-        /// <param name="options">The additional project options to pass along to the project creation command.</param>
-        /// <param name="configuration">The collection of configuration values to correctly initialize the resulting project with secret values.</param>
-        /// <param name="outputWriter">The output logger to add telemetry information during the creation and startup process.</param>
         /// <returns>
         ///     An Azure Functions Service Bus project with a set of services to interact with the project.
         /// </returns>
@@ -89,15 +102,16 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
         /// </exception>
         public static async Task<AzureFunctionsServiceBusProject> StartNewProjectAsync(
             ServiceBusEntityType entityType,
+            string entityName,
             AzureFunctionsServiceBusProjectOptions options,
-            TestConfig configuration,
+            TestTemplatesConfig configuration,
             ITestOutputHelper outputWriter)
         {
             Guard.NotNull(options, nameof(options), "Requires a set of project options to pass along to the project creation command");
             Guard.NotNull(configuration, nameof(configuration), "Requires a configuration instance to retrieve the configuration values to pass along to the to-be-created project");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Requires a test logger to write diagnostic information during the creation and startup process");
 
-            AzureFunctionsServiceBusProject project = CreateNew(entityType, options, configuration, outputWriter);
+            AzureFunctionsServiceBusProject project = CreateNew(entityType, entityName, options, configuration, outputWriter);
 
             await project.StartAsync(entityType);
             return project;
@@ -106,10 +120,6 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
         /// <summary>
         /// Creates a new project from the Azure Functions Service Bus project template.
         /// </summary>
-        /// <param name="entityType">The type of the Azure Service Bus entity, to control the used project template.</param>
-        /// <param name="options">The additional project options to pass along to the project creation command.</param>
-        /// <param name="configuration">The collection of configuration values to correctly initialize the resulting project with secret values.</param>
-        /// <param name="outputWriter">The output logger to add telemetry information during the creation process.</param>
         /// <returns>
         ///     An Azure Functions Service Bus project with a set of services to interact with the project.
         /// </returns>
@@ -118,23 +128,24 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
         /// </exception>
         public static AzureFunctionsServiceBusProject CreateNew(
             ServiceBusEntityType entityType, 
+            string entityName,
             AzureFunctionsServiceBusProjectOptions options, 
-            TestConfig configuration, 
+            TestTemplatesConfig configuration, 
             ITestOutputHelper outputWriter)
         {
             Guard.NotNull(options, nameof(options), "Requires a set of project options to pass along to the project creation command");
             Guard.NotNull(configuration, nameof(configuration), "Requires a configuration instance to retrieve the configuration values to pass along to the to-be-created project");
             Guard.NotNull(outputWriter, nameof(outputWriter), "Requires a test logger to write diagnostic information during the creation process");
 
-            var project = new AzureFunctionsServiceBusProject(entityType, configuration, options, outputWriter);
+            var project = new AzureFunctionsServiceBusProject(entityType, entityName, configuration, options, outputWriter);
             project.CreateNewProject(options);
-            project.AddOrderMessageHandlerImplementation();
+            project.AddActiveOrderMessageHandlerImplementation(entityType, entityName);
             project.AddLocalSettings();
 
             return project;
         }
 
-        private void AddOrderMessageHandlerImplementation()
+        private void AddActiveOrderMessageHandlerImplementation(ServiceBusEntityType entityType, string entityName)
         {
             AddTypeAsFile<Order>();
             AddTypeAsFile<Customer>();
@@ -143,7 +154,22 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
             AddTypeAsFile<WriteToFileMessageHandler>();
             UpdateFileInProject(RuntimeFileName, contents =>
                 RemovesUserErrorsFromContents(contents)
-                    .Replace("OrdersAzureServiceBusMessageHandler", nameof(WriteToFileMessageHandler))); 
+                    .Replace("OrdersAzureServiceBusMessageHandler", nameof(WriteToFileMessageHandler)));
+
+            if (entityType is ServiceBusEntityType.Queue)
+            {
+                UpdateFileInProject("OrderFunction.cs",
+                    contents => contents.Replace(
+                        "[ServiceBusTrigger(\"orders\"", 
+                        $"[ServiceBusTrigger(\"{entityName}\""));
+            }
+            else if (entityType is ServiceBusEntityType.Topic)
+            {
+                UpdateFileInProject("OrderFunction.cs",
+                    contents => contents.Replace(
+                        "[ServiceBusTrigger(\"orders-topic\"",
+                        $"[ServiceBusTrigger(\"{entityName}\""));
+            }
         }
 
         private async Task StartAsync(ServiceBusEntityType entityType)
@@ -172,15 +198,15 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
             }
         }
 
-        private static async Task AddServiceBusTopicSubscriptionAsync(ServiceBusConfig serviceBus)
+        private async Task AddServiceBusTopicSubscriptionAsync(ServiceBusConfig serviceBus)
         {
             var client = new ServiceBusAdministrationClient(serviceBus.FullyQualifiedNamespace, serviceBus.ServicePrincipal.GetCredential());
             var subscriptionName = "order-subscription";
 
-            Response<bool> subscriptionExists = await client.SubscriptionExistsAsync(serviceBus.TopicName, subscriptionName);
+            Response<bool> subscriptionExists = await client.SubscriptionExistsAsync(_entityName, subscriptionName);
             if (!subscriptionExists.Value)
             {
-                await client.CreateSubscriptionAsync(serviceBus.TopicName, subscriptionName);
+                await client.CreateSubscriptionAsync(_entityName, subscriptionName);
             }
         }
 
@@ -228,7 +254,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus
         protected override void Disposing(bool disposing)
         {
             base.Disposing(disposing);
-            Environment.SetEnvironmentVariable("ServiceBusConnectionString", null);
+            Environment.SetEnvironmentVariable("ServiceBusConnection__fullyQualifiedNamespace", null);
             Environment.SetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY", null);
             Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", null);
         }

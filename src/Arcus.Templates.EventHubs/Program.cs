@@ -84,9 +84,13 @@ namespace Arcus.Templates.EventHubs
                            
 #endif
                            var eventHubsName = hostContext.Configuration.GetValue<string>("EVENTHUBS_NAME");
+                           var fullyQualifiedNamespace = hostContext.Configuration.GetValue<string>("EVENTHUBS_NAMESPACE");
+                           
+                           var accountName = hostContext.Configuration.GetValue<string>("STORAGEACCOUNT_NAME");
                            var containerName = hostContext.Configuration.GetValue<string>("BLOBSTORAGE_CONTAINERNAME");
+                           var containerUri = $"https://{accountName}.blob.core.windows.net/{containerName}";
 
-                           services.AddEventHubsMessagePump(eventHubsName, "ARCUS_EVENTHUBS_CONNECTIONSTRING", containerName, "ARCUS_STORAGEACCOUNT_CONNECTIONSTRING")
+                           services.AddEventHubsMessagePumpUsingManagedIdentity(eventHubsName, fullyQualifiedNamespace, containerUri)
                                    .WithEventHubsMessageHandler<SensorReadingAzureEventHubsMessageHandler, SensorReading>();
                            
                            services.AddTcpHealthProbes("ARCUS_HEALTH_PORT");

@@ -18,7 +18,7 @@ namespace Arcus.Templates.Tests.Integration.Configuration
 
     public static class AppInsightsConfigExtensions
     {
-        public static AppInsightsConfig GetAppInsights(this TestConfig config)
+        public static AppInsightsConfig GetAppInsights(this TestTemplatesConfig config)
         {
             return new AppInsightsConfig(
                 config["Arcus:ApplicationInsights:ConnectionString"],

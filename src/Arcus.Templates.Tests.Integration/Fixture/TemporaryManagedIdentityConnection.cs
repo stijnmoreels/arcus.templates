@@ -13,7 +13,7 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// </summary>
         public ManagedIdentityFixture()
         {
-            _connection = TemporaryManagedIdentityConnection.Create(TestConfig.Create());
+            _connection = TemporaryManagedIdentityConnection.Create(TestTemplatesConfig.Create());
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Arcus.Templates.Tests.Integration.Fixture
         /// <summary>
         /// Creates a new <see cref="TemporaryManagedIdentityConnection"/> instance.
         /// </summary>
-        public static TemporaryManagedIdentityConnection Create(TestConfig config)
+        public static TemporaryManagedIdentityConnection Create(TestTemplatesConfig config)
         {
             var servicePrincipal = config.GetServicePrincipal();
 

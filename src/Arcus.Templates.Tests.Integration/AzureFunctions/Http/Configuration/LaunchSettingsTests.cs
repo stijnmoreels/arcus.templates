@@ -22,7 +22,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http.Configuration
         public void HttpTrigger_WithDefault_ConfiguresLaunchSettings()
         {
             // Arrange
-            var config = TestConfig.Create();
+            var config = TestTemplatesConfig.Create();
 
             // Act
             using (var project = AzureFunctionsHttpProject.CreateNew(config, _outputWriter))

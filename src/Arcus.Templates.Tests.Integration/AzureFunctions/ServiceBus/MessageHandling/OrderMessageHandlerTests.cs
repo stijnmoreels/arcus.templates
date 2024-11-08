@@ -10,32 +10,26 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.ServiceBus.MessageHan
 {
     [Collection(TestCollections.Integration)]
     [Trait("Category", TestTraits.Integration)]
-    public class OrderMessageHandlerTests
+    public class OrderMessageHandlerTests : ServiceBusTests
     {
         private readonly ITestOutputHelper _outputWriter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderMessageHandlerTests" /> class.
         /// </summary>
-        public OrderMessageHandlerTests(ITestOutputHelper outputWriter)
+        public OrderMessageHandlerTests(ServiceBusEntityFixture fixture, ITestOutputHelper outputWriter) : base(fixture)
         {
             _outputWriter = outputWriter;
         }
 
         [Theory]
-        //[InlineData(ServiceBusEntityType.Topic)]
+        [InlineData(ServiceBusEntityType.Topic)]
         [InlineData(ServiceBusEntityType.Queue)]
         public async Task ServiceBusProject_WithDefault_CorrectlyProcessesMessage(ServiceBusEntityType entityType)
         {
             // Arrange
-            var config = TestConfig.Create();
-            var options = new AzureFunctionsServiceBusProjectOptions();
-            options.TearDownOptions = TearDownOptions.KeepProjectDirectory;
-            await using var project = await AzureFunctionsServiceBusProject.StartNewProjectAsync(entityType, options, config, _outputWriter);
-
-            //var service = new TestServiceBusMessagePumpService(entityType, config, config.GetAzureFunctionsServiceBusProjectDirectory(entityType), _outputWriter);
-
-            //await service.SimulateMessageProcessingAsync();
+            string entityName = GetEntityName(entityType);
+            await using var project = await AzureFunctionsServiceBusProject.StartNewProjectAsync(entityType, entityName, _outputWriter);
 
             // Act / Assert
             await project.Messaging.SimulateMessageProcessingAsync();

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Arcus.Templates.Tests.Integration.Fixture;
+using Arcus.Templates.Tests.Integration.Worker.ServiceBus.Fixture;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -7,14 +8,14 @@ using Xunit.Abstractions;
 namespace Arcus.Templates.Tests.Integration.Worker.Configuration
 {
     [Trait("Category", TestTraits.Integration)]
-    public class LaunchSettingsTests
+    public class LaunchSettingsTests : ServiceBusTests
     {
         private readonly ITestOutputHelper _outputWriter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LaunchSettingsTests" /> class.
         /// </summary>
-        public LaunchSettingsTests(ITestOutputHelper outputWriter)
+        public LaunchSettingsTests(ServiceBusEntityFixture fixture, ITestOutputHelper outputWriter) : base(fixture)
         {
             _outputWriter = outputWriter;
         }
@@ -25,11 +26,17 @@ namespace Arcus.Templates.Tests.Integration.Worker.Configuration
         public void WorkerTemplate_WithDefault_ConfiguresLaunchSettings(ServiceBusEntityType entityType)
         {
             // Arrange
-            var config = TestConfig.Create();
+            var config = TestTemplatesConfig.Create();
             var options = ServiceBusWorkerProjectOptions.Create(config);
 
+            string entityName = entityType switch
+            {
+                ServiceBusEntityType.Queue => QueueName,
+                ServiceBusEntityType.Topic => TopicName,
+            };
+
             // Act
-            using (var project = ServiceBusWorkerProject.CreateNew(entityType, config, options, _outputWriter))
+            using (var project = ServiceBusWorkerProject.CreateNew(entityType, entityName, config, options, _outputWriter))
             {
                 // Assert
                 string relativePath = Path.Combine("Properties", "launchSettings.json");

@@ -25,7 +25,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.Http.Health
         public async Task AzureFunctionsHttpProject_WithoutOptions_ShouldAnswerToAdministratorEndpoint()
         {
             // Arrange
-            var configuration = TestConfig.Create();
+            var configuration = TestTemplatesConfig.Create();
             AzureFunctionHttpConfig httpConfig = configuration.GetAzureFunctionHttpConfig();
             int httpPort = httpConfig.GetHttpPort();
             var service = new AdminEndpointService(httpPort, AzureFunctionsHttpProject.OrderFunctionName, _outputWriter);

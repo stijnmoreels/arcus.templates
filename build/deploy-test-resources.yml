@@ -53,8 +53,8 @@ stages:
                   --template-file ./build/templates/test-resources.bicep `
                   --parameters location=westeurope `
                   --parameters serviceBusNamespace=$env:ARCUS_TEMPLATES_SERVICEBUS_NAMESPACE `
-                  --parameters serviceBus_queueName=$env:ARCUS_TEMPLATES_SERVICEBUS_QUEUENAME `
-                  --parameters serviceBus_topicName=$env:ARCUS_TEMPLATES_SERVICEBUS_TOPICNAME `
+                  --parameters eventHubsNamespace=$env:ARCUS_TEMPLATES_EVENTHUBS_NAMESPACE `
+                  --parameters storageAccountName=$env:ARCUS_TEMPLATES_STORAGEACCOUNT_NAME `
                   --parameters appInsightsName=$env:ARCUS_TEMPLATES_APPLICATIONINSIGHTS_NAME `
                   --parameters appInsights_connectionString_secretName=$env:ARCUS_TEMPLATES_APPLICATIONINSIGHTS_CONNECTIONSTRING_SECRETNAME `
                   --parameters appInsights_logAnalytics_workspaceId_secretName=$env:ARCUS_TEMPLATES_APPLICATIONINSIGHTS_LOGANALYTICS_WORKSPACEID_SECRETNAME `

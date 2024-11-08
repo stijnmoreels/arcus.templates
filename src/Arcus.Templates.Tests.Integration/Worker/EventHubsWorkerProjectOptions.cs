@@ -9,7 +9,7 @@ namespace Arcus.Templates.Tests.Integration.Worker
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHubsWorkerProjectOptions" /> class.
         /// </summary>
-        private EventHubsWorkerProjectOptions(TestConfig config) : base(config)
+        private EventHubsWorkerProjectOptions(TestTemplatesConfig config) : base(config)
         {
         }
 
@@ -18,7 +18,7 @@ namespace Arcus.Templates.Tests.Integration.Worker
         /// </summary>
         /// <param name="configuration">The integration test configuration instance to retrieve connection secrets.</param>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="configuration"/> is <c>null</c>.</exception>
-        public static EventHubsWorkerProjectOptions Create(TestConfig configuration)
+        public static EventHubsWorkerProjectOptions Create(TestTemplatesConfig configuration)
         {
             Guard.NotNull(configuration, nameof(configuration), "Requires a test configuration instance to retrieve additional connection secrets");
 

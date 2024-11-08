@@ -28,7 +28,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi.Swagger.v1
         public async Task GetSwaggerUI_WithBuildConfiguration_Returns(BuildConfiguration buildConfiguration, HttpStatusCode expectedStatusCode)
         {
             // Arrange
-            var config = TestConfig.Create(buildConfiguration);
+            var config = TestTemplatesConfig.Create(buildConfiguration);
             using (var project = await WebApiProject.StartNewAsync(config, _outputWriter))
             { 
                 // Act

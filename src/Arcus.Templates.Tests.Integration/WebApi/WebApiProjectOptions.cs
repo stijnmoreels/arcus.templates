@@ -74,7 +74,7 @@ namespace Arcus.Templates.Tests.Integration.WebApi
         /// <summary>
         /// Adds the Serilog logging option to the web API project; writing both to the console and to Azure Application Insights.
         /// </summary>
-        public WebApiProjectOptions WithSerilogLogging(TestConfig config)
+        public WebApiProjectOptions WithSerilogLogging(TestTemplatesConfig config)
         {
             AppInsightsConfig appInsights = config.GetAppInsights();
             AddOption("--logging Serilog", 

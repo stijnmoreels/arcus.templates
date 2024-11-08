@@ -8,7 +8,6 @@ using Arcus.Templates.Tests.Integration.Worker.EventHubs.Fixture;
 using Arcus.Testing;
 using GuardNet;
 using Xunit.Abstractions;
-using TestConfig = Arcus.Templates.Tests.Integration.Fixture.TestConfig;
 
 namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
 {
@@ -18,7 +17,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
     public class AzureFunctionsEventHubsProject : AzureFunctionsProject, IAsyncDisposable
     {
         private AzureFunctionsEventHubsProject(
-            TestConfig config,
+            TestTemplatesConfig config,
             AzureFunctionsEventHubsProjectOptions options,
             ITestOutputHelper outputWriter)
             : base(config.GetAzureFunctionsEventHubsProjectDirectory(), config, options, outputWriter)
@@ -43,7 +42,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
         {
             Guard.NotNull(outputWriter, nameof(outputWriter), "Requires a test logger to write diagnostic information during the creation and startup process");
 
-            AzureFunctionsEventHubsProject project = await StartNewAsync(TestConfig.Create(), new AzureFunctionsEventHubsProjectOptions(), outputWriter);
+            AzureFunctionsEventHubsProject project = await StartNewAsync(TestTemplatesConfig.Create(), new AzureFunctionsEventHubsProjectOptions(), outputWriter);
             return project;
         }
 
@@ -60,7 +59,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
         ///     Thrown when the <paramref name="options"/>, the <paramref name="configuration"/>, or the <paramref name="outputWriter"/> is <c>null</c>.
         /// </exception>
         public static async Task<AzureFunctionsEventHubsProject> StartNewAsync(
-            TestConfig configuration,
+            TestTemplatesConfig configuration,
             AzureFunctionsEventHubsProjectOptions options,
             ITestOutputHelper outputWriter)
         {
@@ -87,7 +86,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
         ///     Thrown when the <paramref name="options"/>, the <paramref name="configuration"/>, or the <paramref name="outputWriter"/> is <c>null</c>.
         /// </exception>
         public static AzureFunctionsEventHubsProject CreateNew(
-            TestConfig configuration,
+            TestTemplatesConfig configuration,
             AzureFunctionsEventHubsProjectOptions options,
             ITestOutputHelper outputWriter)
         {
@@ -110,9 +109,9 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
         {
             try
             {
-                EventHubsConfig eventHubsConfig = Configuration.GetEventHubsConfig();
+                EventHubsConfig eventHubsConfig = Configuration.GetEventHubs();
 
-                Environment.SetEnvironmentVariable("EventHubsConnectionString", eventHubsConfig.EventHubsConnectionString);
+                Environment.SetEnvironmentVariable("EventHubsConnection_fullyQualifiedNamespace", eventHubsConfig.FullyQualifiedNamespace);
 
                 AppInsightsConfig appInsightsConfig = Configuration.GetAppInsights();
                 Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", appInsightsConfig.ConnectionString);
@@ -134,7 +133,7 @@ namespace Arcus.Templates.Tests.Integration.AzureFunctions.EventHubs
         /// <returns>A task that represents the asynchronous dispose operation.</returns>
         public async ValueTask DisposeAsync()
         {
-            Environment.SetEnvironmentVariable("EventHubsConnectionString", null);
+            Environment.SetEnvironmentVariable("EventHubsConnection_fullyQualifiedNamespace", null);
             Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", null);
 
             Dispose();
